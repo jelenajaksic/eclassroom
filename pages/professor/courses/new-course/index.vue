@@ -3,7 +3,7 @@
     <app-header>
       <template slot="title">
         <h1>
-          New Course
+          Create a New Course
         </h1>
       </template>
       <template slot="headerButtons">
@@ -18,6 +18,14 @@
             v-model="course.title"
             label="Title"
             required
+          />
+          <v-textarea
+            v-model="course.shortDescription"
+            label="Short Description"
+            type="textarea"
+            auto-grow
+            clearable-icon
+            rows="1"
           />
           <v-textarea
             v-model="course.description"
@@ -59,6 +67,7 @@ export default {
     return {
       course: {
         title: '',
+        shortDescription: '',
         description: '',
         slug: ''
       },

@@ -7,7 +7,7 @@
         </h1>
       </template>
       <template slot="headerButtons">
-        <app-button label="Cancel" class="mr-4" @click="onCancel" />
+        <app-button label="Cancel" :outlined="true" class="mr-4" @click="onCancel" />
         <app-button label="Save" @click="onSave" />
       </template>
     </app-header>
@@ -20,16 +20,20 @@
             required
           />
           <v-text-field
-            v-model="subtitle"
-            label="Subtitle"
-          />
-          <v-text-field
             v-model="shortDescription"
             label="Short Description"
           />
           <v-textarea
             v-model="description"
             label="Description"
+            type="textarea"
+            auto-grow
+            clearable-icon
+            rows="1"
+          />
+          <v-textarea
+            v-model="image"
+            label="Image"
             type="textarea"
             auto-grow
             clearable-icon
@@ -50,7 +54,13 @@
     </div>
     <!--      </transition-group>-->
     <!--    </draggable>-->
-    <app-button-dropdown label="Add Section" class="mt-10" :icon="ICONS.PLUS" :items="sectionTypes" @selected="addSection" />
+    <app-button-dropdown
+      label="Add Section"
+      class="mt-10 mb-10"
+      :icon="ICONS.PLUS"
+      :items="sectionTypes"
+      @selected="addSection"
+    />
     <app-dialog
       v-if="openDialog"
       :open-dialog="openDialog"
@@ -89,9 +99,9 @@ export default {
       sectionTypes: SECTIONS,
       sections: [],
       title: '',
-      subtitle: '',
       description: '',
       shortDescription: '',
+      image: '',
       openDialog: false
     }
   },
@@ -145,7 +155,6 @@ export default {
         slug: this.lessonSlug,
         sections: this.sections,
         title: this.title,
-        subtitle: this.subtitle,
         description: this.description,
         shortDescription: this.shortDescription
       })

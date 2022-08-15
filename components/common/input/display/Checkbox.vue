@@ -1,7 +1,8 @@
 <template>
   <div v-if="answers">
-    <div v-for="answer in answers" :key="answer.label">
+    <div v-for="(answer, index) in answers" :key="index">
       <v-checkbox
+        :id="`${answer.label}-${index}`"
         v-model="answer.correct"
         :label="answer.label"
         :readonly="readonly"
@@ -11,6 +12,7 @@
 </template>
 
 <script>
+import { ICONS } from '../../../../common/commonHelper'
 
 export default {
   name: 'CheckboxInput',
@@ -22,6 +24,11 @@ export default {
     readonly: {
       type: Boolean,
       default: false
+    }
+  },
+  data () {
+    return {
+      ICONS
     }
   }
 }

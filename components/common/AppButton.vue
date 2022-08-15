@@ -2,8 +2,8 @@
   <v-btn
     rounded
     large
+    :outlined="outlined"
     :block="isBlock"
-    elevation="4"
     :disabled="disabled"
     :color="color"
     :class="buttonClass"
@@ -47,6 +47,10 @@ export default {
     icon: {
       type: String,
       default: ''
+    },
+    outlined: {
+      type: Boolean,
+      default: false
     }
   }
 }

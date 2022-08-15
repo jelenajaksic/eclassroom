@@ -1,5 +1,6 @@
 export default function ({ store, redirect }) {
-  if (!store.state.user) {
+  if (Object.values(store.state.user).length === 0) {
+    store.actions.dispatch('logout')
     return redirect('/')
   }
 }

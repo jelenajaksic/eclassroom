@@ -1,10 +1,10 @@
 import { USERS } from './commonHelper'
 const NAVBAR_ITEMS_PROFESSOR = [
-  {
-    icon: 'mdi-home',
-    title: 'Home',
-    to: '/professor'
-  },
+  // {
+  //   icon: 'mdi-home',
+  //   title: 'Home',
+  //   to: '/professor'
+  // },
   {
     icon: 'mdi-school',
     title: 'Courses',
@@ -18,16 +18,17 @@ const NAVBAR_ITEMS_PROFESSOR = [
   {
     icon: 'mdi-logout',
     title: 'Logout',
-    to: '/'
+    to: '/',
+    action: () => this.$store.dispatch('logout')
   }
 ]
 
 const NAVBAR_ITEMS_STUDENT = [
-  {
-    icon: 'mdi-home',
-    title: 'Home',
-    to: '/student'
-  },
+  // {
+  //   icon: 'mdi-home',
+  //   title: 'Home',
+  //   to: '/student'
+  // },
   {
     icon: 'mdi-school',
     title: 'Courses',
@@ -41,7 +42,8 @@ const NAVBAR_ITEMS_STUDENT = [
   {
     icon: 'mdi-logout',
     title: 'Logout',
-    to: '/'
+    to: '/',
+    action: () => this.$store.dispatch('logout')
   }
 ]
 

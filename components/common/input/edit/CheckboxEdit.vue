@@ -1,38 +1,36 @@
 <template>
-  <draggable :v-model="newSection.question.answers">
+  <draggable v-model="newSection.question.answers">
     <transition-group>
-      <div>
-        <div v-for="(answer, index) in newSection.question.answers" :key="index" class="checkbox-input">
-          <v-icon
-            left
-            light
-            class="cursor-grab"
-          >
-            {{ ICONS.DRAG_VERTICAL }}
-          </v-icon>
-          <v-icon
-            left
-            light
-            class="mr-5"
-            @click="answer.correct = !answer.correct; $emit('update', newSection)"
-          >
-            {{ answer.correct ? ICONS.MULTISELECT_MARKED : ICONS.MULTISELECT_BLANK }}
-          </v-icon>
-          <v-text-field
-            :ref="`question-${newSection.id}-answer-${index}`"
-            v-model="answer.label"
-            @input="$emit('update', newSection)"
-            @keyup.enter="addAnswer"
-          />
-          <v-icon
-            right
-            light
-            class="ml-5"
-            @click="removeAnswer(index)"
-          >
-            {{ ICONS.CLOSE }}
-          </v-icon>
-        </div>
+      <div v-for="(answer, index) in newSection.question.answers" :key="index" class="checkbox-input">
+        <v-icon
+          left
+          light
+          class="cursor-grab"
+        >
+          {{ ICONS.DRAG_VERTICAL }}
+        </v-icon>
+        <v-icon
+          left
+          light
+          class="mr-5"
+          @click="answer.correct = !answer.correct; $emit('update', newSection)"
+        >
+          {{ answer.correct ? ICONS.MULTISELECT_MARKED : ICONS.MULTISELECT_BLANK }}
+        </v-icon>
+        <v-text-field
+          :ref="`question-${newSection.id}-answer-${index}`"
+          v-model="answer.label"
+          @input="$emit('update', newSection)"
+          @keyup.enter="addAnswer"
+        />
+        <v-icon
+          right
+          light
+          class="ml-5"
+          @click="removeAnswer(index)"
+        >
+          {{ ICONS.CLOSE }}
+        </v-icon>
       </div>
     </transition-group>
   </draggable>

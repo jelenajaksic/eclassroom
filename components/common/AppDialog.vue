@@ -13,6 +13,10 @@
           {{ text }}
         </v-card-text>
 
+        <v-card-text>
+          <slot name="customDialogContent" />
+        </v-card-text>
+
         <v-card-actions>
           <v-spacer />
 
@@ -29,6 +33,7 @@
             v-if="primaryButtonLabel"
             color="primary"
             text
+            :disabled="primaryDisabled"
             @click="primaryAction"
           >
             {{ primaryButtonLabel }}
@@ -60,6 +65,10 @@ export default {
       default: ''
     },
     openDialog: {
+      type: Boolean,
+      default: false
+    },
+    primaryDisabled: {
       type: Boolean,
       default: false
     }

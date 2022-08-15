@@ -9,14 +9,14 @@
       </template>
     </app-header>
     <v-container>
-      <v-row class="course-overview-wrapper">
-        <v-col cols="12" md="5" lg="5">
+      <v-row class="course-overview-wrapper" align="center">
+        <v-col cols="12" md="6" lg="6">
           <v-img
-            :src="course.img"
+            :src="course.image"
             height="100%"
           />
         </v-col>
-        <v-col cols="12" md="6" lg="6">
+        <v-col cols="12" md="5" lg="5">
           <p class="course-desc">
             {{ course.description }}
           </p>
@@ -24,14 +24,19 @@
       </v-row>
       <v-row>
         <v-col>
-          <h2>
-            Lessons:
+          <div class="page-divider"/>
+        </v-col>
+      </v-row>
+      <v-row v-if="course.lessons.length">
+        <v-col>
+          <h2 class="mb-2">
+            Lessons
           </h2>
         </v-col>
       </v-row>
-      <v-row>
-        <v-col v-for="lesson in lessons" :key="lesson.slug" lg="3">
-          <course-card :data="lesson" @select="goToLesson" />
+      <v-row v-if="course.lessons.length">
+        <v-col v-for="lesson in course.lessons" :key="lesson.slug" lg="3">
+          <course-card :data="lesson" :is-lesson="true" @select="goToLesson" />
         </v-col>
       </v-row>
     </v-container>
@@ -58,15 +63,12 @@ export default {
     }
   },
   computed: {
-    lessons () {
-      return this.$store.getters['lessons/getAllLessons']
-    },
     course () {
-      return this.$store.getters['courses/getCourse']
+      return this.$store.getters['courses/getActiveCourse']
     }
   },
   created () {
-    this.$store.dispatch('courses/getCourse', this.$route.params?.slug)
+    this.$store.dispatch('courses/setActiveCourse', this.$route.params?.slug)
   },
   methods: {
     goToLesson (slug) {
@@ -79,8 +81,7 @@ export default {
 
 <style lang="scss" scoped>
 .course-overview-wrapper {
-  //width: 80%;
-  margin: 2rem auto 5rem;
+  margin: 5rem auto 9rem;
 }
 .course-desc {
   text-align: justify;

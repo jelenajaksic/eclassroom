@@ -34,8 +34,24 @@
         <!--            label="Title"-->
         <!--          />-->
         <v-textarea
+          v-model="newSection.title"
+          label="Title"
+          type="textarea"
+          auto-grow
+          clearable-icon
+          rows="1"
+        />
+        <v-textarea
           v-model="newSection.description"
           label="Paragraph"
+          type="textarea"
+          auto-grow
+          clearable-icon
+          rows="1"
+        />
+        <v-textarea
+          v-model="newSection.image"
+          label="Image"
           type="textarea"
           auto-grow
           clearable-icon
@@ -45,7 +61,7 @@
         <div v-if="newSection.type === SECTION_TYPES.QUESTION">
           <v-textarea
             v-model="newSection.question.description"
-            label="Type a question"
+            label="Question"
             type="textarea"
             auto-grow
             clearable-icon
@@ -166,7 +182,9 @@ export default {
         shortDescription: this.section.shortDescription,
         // title: this.section.title,
         id: this.section.id,
+        title: this.section.title,
         description: this.section.description,
+        image: this.section.image,
         type: this.section.type,
         question: {
           type: this.section?.question?.type || '',

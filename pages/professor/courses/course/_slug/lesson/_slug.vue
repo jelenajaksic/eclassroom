@@ -2,47 +2,45 @@
   <div>
     <app-header>
       <template slot="title">
-        <!--        <div style="display:flex; align-items: center;">-->
-        <h1 v-if="!edit">
+        <h1 v-if="!edit && lesson.title">
           {{ lesson.title }}
         </h1>
-        <!--          <v-icon v-if="!edit" left light class="ml-5" @click="edit = true">-->
-        <!--            {{ ICONS.EDIT }}-->
-        <!--          </v-icon>-->
-        <!--        </div>-->
-        <text-input v-if="edit" label="Lesson Title" :text-input="lesson.title" @input="updateTitle" />
+        <text-input v-if="edit && lesson.title" label="Lesson Title" :text-input="lesson.title" @input="updateTitle" />
       </template>
       <template slot="headerButtons">
-        <!--        TODO: move        -->
-        <app-button v-if="!edit" label="Back" class="mr-4" @click="$router.go(-1)" />
+        <app-button v-if="!edit" label="Back" :outlined="true" class="mr-4" @click="$router.go(-1)" />
         <app-button v-if="!edit" label="Edit Lesson" :icon="ICONS.EDIT" @click="edit = true" />
-        <app-button v-if="edit" label="Cancel" class="mr-4" @click="openDialog = true" />
+        <app-button v-if="edit" label="Cancel" :outlined="true" class="mr-4" @click="openDialog = true" />
         <app-button v-if="edit" label="Save Lesson" @click="saveLesson" />
       </template>
     </app-header>
     <v-container>
       <v-row>
         <v-col>
-          <p v-if="!edit">
-            {{ lesson.subtitle }}
-          </p>
-          <text-input v-if="edit" label="Lesson Subtitle" :text-input="lesson.subtitle" @input="updateSubtitle" />
-        </v-col>
-      </v-row>
-      <v-row>
-        <v-col>
-          <p v-if="!edit">
+          <p v-if="!edit && lesson.shortDescription" style="font-size: 1.5rem;">
             {{ lesson.shortDescription }}
           </p>
           <text-input v-if="edit" label="Lesson Short Description" :text-input="lesson.shortDescription" @input="updateShortDescription" />
         </v-col>
       </v-row>
-      <v-row>
-        <v-col>
-          <p v-if="!edit">
+      <v-row align="center">
+        <v-col lg="4" md="4">
+          <v-img
+            :src="lesson.image"
+            height="200px"
+            contain
+          />
+        </v-col>
+        <v-col lg="7" md="7">
+          <p v-if="!edit && lesson.description" class="mb-8">
             {{ lesson.description }}
           </p>
           <text-input v-if="edit" label="Lesson Description" :text-input="lesson.description" @input="updateDescription" />
+        </v-col>
+      </v-row>
+      <v-row align="center">
+        <v-col>
+          <text-input v-if="edit" label="Lesson Image" :text-input="lesson.image" @input="updateDescription" />
         </v-col>
       </v-row>
       <v-row v-for="(section, index) in lesson.sections" :key="index">
@@ -52,9 +50,9 @@
           elevation="2"
           width="100%"
         >
-          <!--          <v-icon v-if="!edit" right light class="mb-5" @click="edit = true">-->
-          <!--            {{ ICONS.EDIT }}-->
-          <!--          </v-icon>-->
+          <v-card-title v-if="section.title" class="pl-0">
+            {{ section.title }}
+          </v-card-title>
           <p v-if="section.description && !edit">
             {{ section.description }}
           </p>
@@ -77,7 +75,7 @@
             <text-input
               v-if="section.question.type === QUESTION_TYPES.TEXT"
               :readonly="true"
-              label="Answer"
+              :label="section.question.answers[0].label"
             />
             <checkbox
               v-if="section.question.type === QUESTION_TYPES.MULTISELECT && !edit"
@@ -145,46 +143,45 @@ export default {
       QUESTION_TYPES,
       SECTION_TYPES,
       edit: false,
-      openDialog: false
+      openDialog: false,
+      lesson: {}
     }
   },
   computed: {
-    lesson () {
-      return this.$store.getters['lesson/getLesson']
+    initLesson () {
+      return this.$store.getters['courses/getActiveLesson']
     }
   },
   created () {
-    this.$store.dispatch('lesson/getLesson')
+    this.lesson = JSON.parse(JSON.stringify(this.initLesson))
   },
   methods: {
     updateTitle (title) {
-      this.$store.dispatch('lesson/updateTitle', title)
-    },
-    updateSubtitle (subtitle) {
-      this.$store.dispatch('lesson/updateSubtitle', subtitle)
+      // this.$store.dispatch('lesson/updateTitle', title)
     },
     updateShortDescription (shortDescription) {
-      this.$store.dispatch('lesson/updateShortDescription', shortDescription)
+      // this.$store.dispatch('lesson/updateShortDescription', shortDescription)
     },
     updateDescription (description) {
-      this.$store.dispatch('lesson/updateDescription', description)
+      // this.$store.dispatch('lesson/updateDescription', description)
     },
     updateQuestionDescription (description, index) {
-      this.$store.dispatch('lesson/updateQuestionDescription', { description, index })
+      // this.$store.dispatch('lesson/updateQuestionDescription', { description, index })
     },
     updateSectionDescription (description, index) {
-      this.$store.dispatch('lesson/updateSectionDescription', { description, index })
+      // this.$store.dispatch('lesson/updateSectionDescription', { description, index })
     },
     updateQuestionAnswers (section, index) {
-      this.$store.dispatch('lesson/updateQuestionAnswers', {
-        answers: section.question.answers,
-        index
-      })
+      // this.$store.dispatch('lesson/updateQuestionAnswers', {
+      //   answers: section.question.answers,
+      //   index
+      // })
     },
     saveLesson () {
       this.edit = false
     },
     onCancel () {
+      this.openDialog = false
       this.edit = false
     }
   }

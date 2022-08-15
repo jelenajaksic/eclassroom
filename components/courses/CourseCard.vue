@@ -8,11 +8,11 @@
         @click="$emit('select', data.slug)"
       >
         <v-img
-          src="https://cdn.vuetifyjs.com/images/cards/sunshine.jpg"
+          :src="data.image"
           height="200px"
         />
         <v-overlay
-          v-if="data.shortDescription"
+          v-if="data.shortDescription && !isLesson"
           absolute
           color="white"
           :value="hover"
@@ -20,16 +20,22 @@
           class="mt-4"
           style="height: 200px"
         >
-          <span class="overlay-text"> {{ data.shortDescription }} </span>
+          <p class="overlay-text">
+            {{ data.shortDescription }}
+          </p>
         </v-overlay>
         <v-card-title v-if="data.title">
           {{ data.title }}
         </v-card-title>
 
-        <v-card-subtitle v-if="data.subtitle">
-          {{ data.subtitle }}
+        <v-card-subtitle v-if="data.shortDescription && isLesson">
+          {{ data.shortDescription }}
         </v-card-subtitle>
-        <v-progress-linear v-if="user === USERS.STUDENT && data.progress" rounded :value="data.progress.toString()" />
+        <v-progress-linear
+          v-if="hasStudentProgress"
+          rounded
+          :value="studentProgress"
+        />
       </v-card>
     </template>
   </v-hover>
@@ -44,6 +50,10 @@ export default {
     data: {
       type: Object,
       default: () => {}
+    },
+    isLesson: {
+      type: Boolean,
+      default: false
     }
   },
   data () {
@@ -55,6 +65,16 @@ export default {
   computed: {
     user () {
       return this.$store.getters.getUser
+    },
+    userRole () {
+      return this.$store.getters.getUserRole
+    },
+    hasStudentProgress () {
+      // return this.userRole === USERS.STUDENT && (this.data.students[this.user.email]?.length > 0)
+      return false
+    },
+    studentProgress () {
+      return this.isLesson ? this.data.students[this.user.email].find(lesson => lesson.id === this.data.id).progress : '0'
     }
   }
 }
@@ -63,9 +83,13 @@ export default {
 <style lang="scss" scoped>
   .card-default {
     cursor: pointer;
+    min-width: 300px;
   }
   .overlay-text {
     color: #000000;
     opacity: 50%;
+    text-align: center;
+    max-width: 70%;
+    margin: 0 auto;
   }
 </style>

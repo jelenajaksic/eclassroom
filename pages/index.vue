@@ -25,7 +25,6 @@
           <v-row>
             <v-text-field
               v-model="password"
-              hide-details
               label="Password"
               type="password"
               filled
@@ -35,15 +34,19 @@
             />
           </v-row>
           <v-row>
-            <app-button :disabled="!valid" label="Login" :is-block="true" button-class="mt-10" @click="login" />
+            <app-button
+              :disabled="!valid"
+              label="Login"
+              :is-block="true"
+              button-class="mt-10"
+              color="accent"
+              @click="login"
+            />
           </v-row>
         </v-col>
         <v-col cols="12" md="4" />
         <v-col cols="12" md="4">
           <v-img src="abacus.png" />
-          <!--          <h1 class="logo main">-->
-          <!--            e-classroom-->
-          <!--          </h1>-->
         </v-col>
       </v-row>
     </v-container>
@@ -63,13 +66,11 @@
 <script>
 import AppButton from '../components/common/AppButton'
 import { ALERT_TYPES } from '../common/commonHelper'
-// import Alert from '../components/common/Alert'
 
 export default {
   name: 'IndexPage',
   components: {
     AppButton
-    // Alert
   },
   layout: 'login',
   data: () => ({

@@ -8,20 +8,20 @@
       </template>
       <template slot="headerButtons">
         <app-button v-if="!edit" label="Edit Profile" :icon="ICONS.EDIT" @click="editProfile" />
-        <app-button v-if="edit" label="Cancel" class="mr-4" @click="cancel" />
+        <app-button v-if="edit" label="Cancel" :outlined="true" class="mr-4" @click="cancel" />
         <app-button v-if="edit" label="Save" :disabled="!valid" @click="save" />
       </template>
     </AppHeader>
     <v-container mx-auto class="mt-10">
       <v-row align="center">
-        <v-col lg="4">
+        <v-col md="4" lg="4">
           <v-img
-            src="person3.png"
+            :src="profileImage"
             contain
           />
         </v-col>
-        <v-col lg="2" />
-        <v-col lg="6">
+        <v-col md="1" lg="1" />
+        <v-col md="5" lg="5">
           <v-form ref="form" v-model="valid" lazy-validation>
             <v-text-field
               v-model="name"
@@ -51,107 +51,18 @@
             <v-text-field
               v-if="edit"
               v-model="newPass"
-              hide-details
               type="password"
               label="New Password"
             />
             <v-text-field
               v-if="edit"
               v-model="reenterNewPass"
-              hide-details
               type="password"
               label="Reenter New Password"
               :rules="reenterNewPassRules"
             />
-            <!--            <app-button v-if="edit" label="Cancel" :is-block="true" button-class="mt-10" @click="cancel" />-->
-            <!--            <app-button-->
-            <!--              v-if="edit"-->
-            <!--              :disabled="!valid"-->
-            <!--              label="Save"-->
-            <!--              :is-block="true"-->
-            <!--              button-class="mt-10"-->
-            <!--              @click="save"-->
-            <!--            />-->
           </v-form>
         </v-col>
-        <!--        <v-col lg="6">-->
-        <!--          <v-row>-->
-        <!--            <v-text-field-->
-        <!--              v-model="name"-->
-        <!--              label="Name"-->
-        <!--              :readonly="!edit.name"-->
-        <!--            />-->
-        <!--            <v-icon v-if="!edit.name" left light class="ml-5" @click="edit.name = true">-->
-        <!--              {{ ICONS.EDIT }}-->
-        <!--            </v-icon>-->
-        <!--            <v-icon v-if="edit.name" left light class="ml-5" @click="cancel('name')">-->
-        <!--              {{ ICONS.CLOSE }}-->
-        <!--            </v-icon>-->
-        <!--            <v-icon v-if="edit.name" left light class="ml-5" @click="saveName()">-->
-        <!--              {{ ICONS.SAVE }}-->
-        <!--            </v-icon>-->
-        <!--          </v-row>-->
-        <!--          <v-row>-->
-        <!--            <v-text-field-->
-        <!--              v-model="email"-->
-        <!--              label="Email"-->
-        <!--              :readonly="!edit.email"-->
-        <!--              :rules="emailRules"-->
-        <!--            />-->
-        <!--            <v-icon v-if="!edit.email" left light class="ml-5" @click="edit.email = true">-->
-        <!--              {{ ICONS.EDIT }}-->
-        <!--            </v-icon>-->
-        <!--            <v-icon v-if="edit.email" left light class="ml-5" @click="cancel('email')">-->
-        <!--              {{ ICONS.CLOSE }}-->
-        <!--            </v-icon>-->
-        <!--            <v-icon v-if="edit.email" left light class="ml-5" @click="saveEmail()">-->
-        <!--              {{ ICONS.SAVE }}-->
-        <!--            </v-icon>-->
-        <!--          </v-row>-->
-        <!--          <v-row v-if="!edit.password">-->
-        <!--            <v-text-field-->
-        <!--              v-model="password"-->
-        <!--              type="password"-->
-        <!--              label="Password"-->
-        <!--              :readonly="true"-->
-        <!--            />-->
-        <!--            <v-icon left light class="ml-5" @click="edit.password = true">-->
-        <!--              {{ ICONS.EDIT }}-->
-        <!--            </v-icon>-->
-        <!--          </v-row>-->
-        <!--          <v-row v-if="edit.password">-->
-        <!--            <v-text-field-->
-        <!--              v-model="oldPass"-->
-        <!--              hide-details-->
-        <!--              type="password"-->
-        <!--              label="Old Password"-->
-        <!--              :rules="oldPasswordRules"-->
-        <!--            />-->
-        <!--            <v-icon v-if="edit.password" left light class="ml-5" @click="cancel('password')">-->
-        <!--              {{ ICONS.CLOSE }}-->
-        <!--            </v-icon>-->
-        <!--            <v-icon v-if="edit.password" left light class="ml-5" @click="savePassword()">-->
-        <!--              {{ ICONS.SAVE }}-->
-        <!--            </v-icon>-->
-        <!--          </v-row>-->
-        <!--          <v-row v-if="edit.password">-->
-        <!--            <v-text-field-->
-        <!--              v-model="newPass"-->
-        <!--              hide-details-->
-        <!--              type="password"-->
-        <!--              label="New Password"-->
-        <!--            />-->
-        <!--          </v-row>-->
-        <!--          <v-row v-if="edit.password">-->
-        <!--            <v-text-field-->
-        <!--              v-model="reenterNewPass"-->
-        <!--              hide-details-->
-        <!--              type="password"-->
-        <!--              label="Reenter Password"-->
-        <!--              :rules="reenterNewPassRules"-->
-        <!--            />-->
-        <!--          </v-row>-->
-        <!--        </v-col>-->
       </v-row>
     </v-container>
   </div>
@@ -176,11 +87,6 @@ export default {
       newPass: '',
       oldPass: '',
       reenterNewPass: '',
-      // edit: {
-      //   name: false,
-      //   email: false,
-      //   password: false
-      // },
       edit: false,
       ICONS,
       valid: false,
@@ -199,6 +105,9 @@ export default {
   computed: {
     profileData () {
       return this.$store.getters.getUser
+    },
+    profileImage () {
+      return this.profileData.admin ? 'person2.png' : 'person3.png'
     }
   },
   created () {

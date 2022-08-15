@@ -7,20 +7,25 @@
       app
     >
       <v-list>
-        <v-list-item
-          v-for="(item, i) in navItems"
-          :key="i"
-          :to="item.to"
-          router
-          exact
+        <v-list-item-group
+          color="primary"
         >
-          <v-list-item-action>
-            <v-icon>{{ item.icon }}</v-icon>
-          </v-list-item-action>
-          <v-list-item-content>
-            <v-list-item-title v-text="item.title" />
-          </v-list-item-content>
-        </v-list-item>
+          <v-list-item
+            v-for="(item, i) in navItems"
+            :key="i"
+            :to="item.to"
+            router
+            exact
+            @click="takeAction(item)"
+          >
+            <v-list-item-action>
+              <v-icon>{{ item.icon }}</v-icon>
+            </v-list-item-action>
+            <v-list-item-content>
+              <v-list-item-title v-text="item.title" />
+            </v-list-item-content>
+          </v-list-item>
+        </v-list-item-group>
       </v-list>
       <v-list>
         <v-list-item
@@ -53,11 +58,18 @@ export default {
     }
   },
   computed: {
-    user () {
-      return this.$store.getters.getUser
+    userRole () {
+      return this.$store.getters.getUserRole
     },
     navItems () {
-      return getNavItems(this.user)
+      return getNavItems(this.userRole)
+    }
+  },
+  methods: {
+    takeAction (item) {
+      if (item?.action) {
+        item.action()
+      }
     }
   }
 }

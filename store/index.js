@@ -1,3 +1,5 @@
+import { USERS } from '../common/commonHelper'
+
 export const state = () => ({
   user: {}
 })
@@ -13,9 +15,9 @@ export const actions = {
     const response = await this.$axios.$post('api/login', loginData)
     commit('setUser', response)
     if (response?.admin) {
-      await this.$router.push('/professor')
+      await this.$router.push('/professor/courses')
     } else {
-      await this.$router.push('/student')
+      await this.$router.push('/student/courses')
     }
   },
   logout ({ commit }) {
@@ -26,5 +28,8 @@ export const actions = {
 export const getters = {
   getUser (state) {
     return state.user
+  },
+  getUserRole (state) {
+    return state.user.admin ? USERS.PROFESSOR : USERS.STUDENT
   }
 }
