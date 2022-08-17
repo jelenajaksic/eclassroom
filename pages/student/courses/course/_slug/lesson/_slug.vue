@@ -5,39 +5,42 @@
         <h1> {{ lesson.title }} </h1>
       </template>
       <template slot="headerButtons">
-        <app-button v-if="displayOverview" label="Back To Course" class="mr-4" @click="backToCourse" />
+        <app-button v-if="displayOverview" :label="overviewButtonLabel" class="mr-4" @click="startLesson" />
         <app-button
           v-if="!displayOverview"
-          :disabled="currentSection.id === 0"
+          :disabled="currentSection === 0"
           class="mr-4"
           label="Previous"
-          @click="updateCurrentSection(currentSection.id - 1)"
+          @click="updateCurrentSection(currentSection - 1)"
         />
         <app-button
           v-if="!displayOverview"
           :label="forwardButtonLabel"
-          @click="isProgressComplete ? completeLesson() : updateCurrentSection(currentSection.id + 1)"
+          @click="isProgressComplete ? completeLesson() : updateCurrentSection(currentSection + 1)"
+        />
+      </template>
+      <template slot="navigation">
+        <v-breadcrumbs
+          :items="breadcrumbsItems"
+          divider="/"
+          style="padding: 0 0 1rem;"
         />
       </template>
     </app-header>
-    <!--    <v-scroll-x-transition>-->
     <lesson-overview
       v-if="displayOverview"
       :description="lesson.description"
-      @start="startLesson"
+      :image="lesson.image"
     />
-    <!--    </v-scroll-x-transition>-->
     <v-progress-linear
       v-if="!displayOverview"
       rounded
-      :value="lesson.progress.toString()"
+      :value="progress.toString()"
     />
-    <!--    <v-scroll-x-transition>-->
     <student-section
       v-if="!displayOverview"
-      :section="currentSection"
+      :section="lesson.sections[currentSection]"
     />
-    <!--    </v-scroll-x-transition>-->
     <app-dialog
       v-if="openDialog"
       :open-dialog="openDialog"
@@ -74,25 +77,48 @@ export default {
       QUESTION_TYPES,
       SECTION_TYPES,
       displayOverview: true,
-      openDialog: false
+      openDialog: false,
+      currentSection: 0
     }
   },
   computed: {
-    lesson () {
-      return this.$store.getters['student-lesson/getLesson']
+    breadcrumbsItems () {
+      return [
+        {
+          text: 'Courses',
+          disabled: false,
+          href: '/student/courses'
+        },
+        {
+          text: `${this.activeCourse.title}`,
+          disabled: false,
+          href: `/student/courses/course/${this.activeCourse.slug}`
+        },
+        {
+          text: `${this.lesson.title}`,
+          disabled: true,
+          href: ''
+        }
+      ]
     },
-    currentSection () {
-      return this.$store.getters['student-lesson/getCurrentSection']
+    lesson () {
+      return this.$store.getters['courses/getActiveLesson']
+    },
+    activeCourse () {
+      return this.$store.getters['courses/getActiveCourse']
     },
     isProgressComplete () {
-      return this.currentSection.id === this.lesson.sections.length - 1
+      return this.currentSection === this.lesson.sections.length - 1
     },
     forwardButtonLabel () {
       return this.isProgressComplete ? 'Done' : 'Next'
+    },
+    overviewButtonLabel () {
+      return this.currentSection ? 'Continue Lesson' : 'Start Lesson'
+    },
+    progress () {
+      return this.openDialog ? 100 : Math.round((this.currentSection / this.lesson.sections.length) * 100)
     }
-  },
-  created () {
-    this.$store.dispatch('student-lesson/getLesson')
   },
   methods: {
     // saveProgress () {
@@ -106,14 +132,9 @@ export default {
       }
     },
     updateCurrentSection (index) {
-      this.$store.dispatch('student-lesson/updateCurrentSection', index)
+      this.currentSection = index
+      // this.$store.dispatch('student-lesson/updateCurrentSection', index)
     },
-    // nextSection () {
-    //   this.$store.dispatch('student-lesson/updateCurrentSection', this.currentSection.id + 1)
-    // },
-    // previousSection () {
-    //   this.$store.dispatch('student-lesson/updateCurrentSection', this.currentSection.id - 1)
-    // },
     completeLesson () {
       this.$store.dispatch('student-lesson/completeLesson')
       this.openDialog = true

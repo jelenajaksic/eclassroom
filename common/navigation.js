@@ -24,11 +24,11 @@ const NAVBAR_ITEMS_PROFESSOR = [
 ]
 
 const NAVBAR_ITEMS_STUDENT = [
-  // {
-  //   icon: 'mdi-home',
-  //   title: 'Home',
-  //   to: '/student'
-  // },
+  {
+    icon: 'mdi-home',
+    title: 'Home',
+    to: '/student'
+  },
   {
     icon: 'mdi-school',
     title: 'Courses',

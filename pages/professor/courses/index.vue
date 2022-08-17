@@ -1,5 +1,5 @@
 <template>
-  <div>
+  <div v-if="courses">
     <app-header>
       <template slot="title">
         <h1>

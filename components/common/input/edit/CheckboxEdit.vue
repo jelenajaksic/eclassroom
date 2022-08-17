@@ -64,13 +64,13 @@ export default {
         correct: false
       })
       this.$nextTick(() => this.$refs[`question-${this.newSection.id}-answer-${this.newSection.question.answers.length - 1}`][0].focus())
-      this.$emit('update', this.newSection)
+      this.$emit('update', this.newSection.question.answers)
     },
     removeAnswer (index) {
       this.newSection.question.answers.splice(index, 1)
       // eslint-disable-next-line no-return-assign
       this.newSection.question.answers.forEach(s => s.id = this.newSection.question.answers.indexOf(s))
-      this.$emit('update', this.newSection)
+      this.$emit('update', this.newSection.question.answers)
     }
   }
 }

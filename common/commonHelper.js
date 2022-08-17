@@ -18,7 +18,10 @@ export const ICONS = {
   MULTISELECT_BLANK: 'mdi-checkbox-blank-outline',
   MULTISELECT_MARKED: 'mdi-checkbox-marked',
   QUESTION: 'mdi-help',
-  CHECK: 'mdi-check'
+  CHECK: 'mdi-check',
+  CAMERA: 'mdi-camera',
+  ARROW_UP: 'mdi-arrow-up-bold-circle-outline',
+  ARROW_DOWN: 'mdi-arrow-down-bold-circle-outline'
 }
 
 export const ALERT_TYPES = {
@@ -69,3 +72,5 @@ export const SECTIONS = [
     icon: ICONS.QUESTION
   }
 ]
+
+export const slugFromTitle = title => title.toLowerCase().join('-')

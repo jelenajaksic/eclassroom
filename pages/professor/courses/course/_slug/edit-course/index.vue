@@ -43,13 +43,12 @@
               max-width="300px"
               class="mr-4"
             />
-            <v-textarea
+            <v-file-input
               v-model="image"
+              show-size
+              small-chips
+              :prepend-icon="ICONS.CAMERA"
               label="Image"
-              type="textarea"
-              auto-grow
-              clearable-icon
-              rows="1"
             />
           </div>
         </v-card>
@@ -72,6 +71,7 @@
 import AppHeader from '../../../../../../components/common/AppHeader'
 import AppButton from '../../../../../../components/common/AppButton'
 import AppDialog from '../../../../../../components/common/AppDialog'
+import { ICONS } from '../../../../../../common/commonHelper'
 
 export default {
   name: 'EditCourse',
@@ -82,10 +82,11 @@ export default {
   },
   data () {
     return {
+      ICONS,
       title: '',
       shortDescription: '',
       description: '',
-      image: '',
+      image: null,
       openDialog: false
     }
   },

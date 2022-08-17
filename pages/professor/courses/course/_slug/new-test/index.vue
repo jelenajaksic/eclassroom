@@ -3,7 +3,7 @@
     <app-header>
       <template slot="title">
         <h1>
-          New Lesson
+          New Test
         </h1>
       </template>
       <template slot="headerButtons">
@@ -31,12 +31,13 @@
             clearable-icon
             rows="1"
           />
-          <v-file-input
+          <v-textarea
             v-model="image"
-            show-size
-            small-chips
-            :prepend-icon="ICONS.CAMERA"
             label="Image"
+            type="textarea"
+            auto-grow
+            clearable-icon
+            rows="1"
           />
         </v-card>
       </template>
@@ -53,13 +54,14 @@
         @update-section="s => updateSection(index, s)"
       />
     </div>
-    <app-button-dropdown
-      label="Add Section"
-      class="mt-10 mb-10"
-      :icon="ICONS.PLUS"
-      :items="sectionTypes"
-      @selected="addSection"
-    />
+    <div class="section-button-wrapper">
+      <app-button
+        label="Add Section"
+        class="mb-10 mt-10"
+        :icon="ICONS.PLUS"
+        @click="addSection"
+      />
+    </div>
     <app-dialog
       v-if="openDialog"
       :open-dialog="openDialog"
@@ -76,31 +78,30 @@
 <script>
 import AppHeader from '../../../../../../components/common/AppHeader'
 import AppButton from '../../../../../../components/common/AppButton'
-import AppButtonDropdown from '../../../../../../components/common/AppButtonDropdown'
 import LessonSection from '../../../../../../components/lessons/LessonSection'
 import AppDialog from '../../../../../../components/common/AppDialog'
-import { SECTIONS, ICONS, slugFromTitle } from '../../../../../../common/commonHelper'
+import { SECTIONS, ICONS, SECTION_TYPES, slugFromTitle } from '../../../../../../common/commonHelper'
 
 export default {
   name: 'NewLesson',
   components: {
     AppHeader,
     AppButton,
-    AppButtonDropdown,
     LessonSection,
     AppDialog
   },
   data () {
     return {
       ICONS,
+      SECTION_TYPES,
       sectionTypes: SECTIONS,
       sections: [],
       title: '',
       description: '',
       shortDescription: '',
-      image: null,
-      openDialog: false,
-      reload: false
+      image: '',
+      reload: false,
+      openDialog: false
     }
   },
   computed: {
@@ -114,7 +115,7 @@ export default {
     },
     async onSave () {
       this.$router.go(-1)
-      const newLesson = {
+      const newTest = {
         // TODO: add uuid
         id: '',
         slug: slugFromTitle(this.title),
@@ -124,20 +125,20 @@ export default {
         shortDescription: this.shortDescription,
         image: this.image
       }
-      await this.$store.dispatch('courses/addLesson', {
+      await this.$store.dispatch('courses/addTest', {
         courseID: this.course.id,
-        lesson: newLesson
+        lesson: newTest
       })
       // TODO: add popup
     },
-    addSection (item) {
+    addSection () {
       this.sections.push({
         // TODO: add uuid
         title: '',
         description: '',
         shortDescription: '',
-        type: item.slug,
         image: null,
+        type: SECTION_TYPES.QUESTION,
         question: {
           type: '',
           description: '',
@@ -166,8 +167,16 @@ export default {
       this.reload = !this.reload
     },
     onPrimaryAction () {
+      // TODO: redirect to course
       this.$router.go(-1)
     }
   }
 }
 </script>
+
+<style lang="scss" scoped>
+.section-button-wrapper {
+  width: 100%;
+  text-align: center;
+}
+</style>

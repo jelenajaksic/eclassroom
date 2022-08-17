@@ -8,7 +8,7 @@
               Welcome back!
             </h1>
             <h3 style="font-weight: normal;">
-              Please log in to your account
+              {{ showForgotPassword ? 'Enter your email to reset your password' : 'Please log in to your account' }}
             </h3>
           </v-row>
           <v-row>
@@ -16,6 +16,7 @@
               v-model="email"
               :rules="emailRules"
               label="E-mail"
+              type="text"
               filled
               required
               background-color="white"
@@ -34,13 +35,17 @@
             />
           </v-row>
           <v-row>
+            <p role="button" class="forgot-pass-btn" @click="showForgotPassword = !showForgotPassword">
+              {{ showForgotPassword ? 'Back to login' : 'Forgot password' }}
+            </p>
+          </v-row>
+          <v-row>
             <app-button
               :disabled="!valid"
-              label="Login"
+              :label="showForgotPassword ? 'Send Email' : 'Login'"
               :is-block="true"
-              button-class="mt-10"
               color="accent"
-              @click="login"
+              @click="showForgotPassword ? resetPassword() : login()"
             />
           </v-row>
         </v-col>
@@ -50,15 +55,14 @@
         </v-col>
       </v-row>
     </v-container>
-    <!--    <alert v-if="displayLoginErrMsg" :message="loginErrorMessage" :type="ALERT_TYPES.ERROR" :display="displayLoginErrMsg" />-->
     <v-alert
-      v-model="displayLoginErrMsg"
+      v-model="displayAlert"
       dismissible
-      :type="ALERT_TYPES.ERROR"
+      :type="alertType"
       dense
       transition="scale-transition"
     >
-      {{ loginErrorMessage }}
+      {{ alertMessage }}
     </v-alert>
   </v-form>
 </template>
@@ -74,6 +78,7 @@ export default {
   },
   layout: 'login',
   data: () => ({
+    showForgotPassword: false,
     valid: false,
     email: '',
     password: '',
@@ -81,8 +86,9 @@ export default {
       v => !!v || 'E-mail is required',
       v => /.+@.+/.test(v) || 'E-mail must be valid'
     ],
-    loginErrorMessage: 'Wrong credentials. Please try again.',
-    displayLoginErrMsg: false,
+    alertMessage: '',
+    alertType: ALERT_TYPES.ERROR,
+    displayAlert: false,
     ALERT_TYPES
   }),
   methods: {
@@ -93,9 +99,32 @@ export default {
           password: this.password
         })
       } catch (error) {
-        this.displayLoginErrMsg = true
+        this.alertType = ALERT_TYPES.ERROR
+        this.alertMessage = 'Wrong credentials. Please try again.'
+        this.displayAlert = true
+      }
+    },
+    async resetPassword () {
+      try {
+        await this.$store.dispatch('resetPassword', this.email)
+        this.alertType = ALERT_TYPES.SUCCESS
+        this.alertMessage = `Please check your ${this.email} inbox!`
+        this.displayAlert = true
+      } catch (error) {
+        this.alertType = ALERT_TYPES.ERROR
+        this.alertMessage = 'Something went wrong. Please try again.'
+        this.displayAlert = true
       }
     }
   }
 }
 </script>
+
+<style lang="scss" scoped>
+.forgot-pass-btn {
+  color: whitesmoke;
+  font-size: 12px;
+  text-decoration: underline;
+  cursor: pointer;
+}
+</style>

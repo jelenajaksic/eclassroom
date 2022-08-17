@@ -7,7 +7,7 @@
         </h1>
       </template>
       <template slot="headerButtons">
-        <app-button label="Cancel" class="mr-4" @click="onCancel" />
+        <app-button label="Cancel" :outlined="true" class="mr-4" @click="onCancel" />
         <app-button label="Save" @click="onSave" />
       </template>
     </app-header>
@@ -15,12 +15,12 @@
       <template #default="{ hover }">
         <v-card class="pa-10 mt-10" :elevation="hover ? 2 : 0">
           <v-text-field
-            v-model="course.title"
+            v-model="title"
             label="Title"
             required
           />
           <v-textarea
-            v-model="course.shortDescription"
+            v-model="shortDescription"
             label="Short Description"
             type="textarea"
             auto-grow
@@ -28,25 +28,42 @@
             rows="1"
           />
           <v-textarea
-            v-model="course.description"
+            v-model="description"
             label="Description"
             type="textarea"
             auto-grow
             clearable-icon
             rows="1"
           />
+          <v-file-input
+            v-model="image"
+            show-size
+            small-chips
+            :prepend-icon="ICONS.CAMERA"
+            label="Image"
+          />
         </v-card>
       </template>
     </v-hover>
     <app-dialog
+      v-if="openCloseDialog"
+      :open-dialog="openCloseDialog"
+      title="Are you sure?"
+      text="If you leave the page the progress will be lost."
+      primary-button-label="Leave without saving"
+      secondary-button-label="Cancel"
+      @secondary="openCloseDialog = false"
+      @primary="goToCourses"
+    />
+    <app-dialog
       v-if="openDialog"
       :open-dialog="openDialog"
       title="Course successfully created"
-      text="Do you want to create the first lesson in this course?"
+      text="You can now see this course in the list of courses, or create the first lesson in this course."
       primary-button-label="Create Lesson"
-      secondary-button-label="Close"
-      @secondary="onSecondaryAction"
-      @primary="onPrimaryAction"
+      secondary-button-label="Go to Courses"
+      @secondary="goToCourses"
+      @primary="createLesson"
     />
   </div>
 </template>
@@ -55,6 +72,7 @@
 import AppHeader from '../../../../components/common/AppHeader'
 import AppButton from '../../../../components/common/AppButton'
 import AppDialog from '../../../../components/common/AppDialog'
+import { slugFromTitle, ICONS } from '../../../../common/commonHelper'
 
 export default {
   name: 'NewCourse',
@@ -65,39 +83,45 @@ export default {
   },
   data () {
     return {
-      course: {
-        title: '',
-        shortDescription: '',
-        description: '',
-        slug: ''
-      },
-      openDialog: false
+      ICONS,
+      title: '',
+      shortDescription: '',
+      description: '',
+      image: null,
+      openDialog: false,
+      openCloseDialog: false
     }
   },
   computed: {
-    courseSlug () {
-      return this.$store.getters['courses/getNewCourseSlug']
+    slug () {
+      return slugFromTitle(this.course.title)
+    },
+    user () {
+      return this.$store.getters.getUser
     }
   },
   methods: {
     onCancel () {
-      this.$router.go(-1)
+      this.openCloseDialog = true
     },
     onSave () {
       this.openDialog = true
       this.$store.dispatch('courses/addCourse', {
-        slug: this.courseSlug,
-        title: this.course.title,
-        description: this.course.description,
-        progress: 0,
+        slug: this.slug,
+        title: this.title,
+        description: this.description,
+        short_description: this.shortDescription,
+        admin: this.user.email,
+        image: this.image,
+        students: {},
         lessons: []
       })
     },
-    onSecondaryAction () {
+    goToCourses () {
       this.$router.push('/professor/courses')
     },
-    onPrimaryAction () {
-      this.$router.push(`/professor/courses/course/${this.courseSlug}/new-lesson`)
+    createLesson () {
+      this.$router.push(`/professor/courses/course/${this.slug}/new-lesson`)
     }
   }
 }

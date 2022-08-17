@@ -1,5 +1,5 @@
 <template>
-  <nuxt-link :to="link">
+  <nuxt-link :to="link" class="back-link-wrapper">
     <p class="back-link">
       {{ label }}
     </p>
@@ -23,8 +23,13 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-.nuxt-link-active {
+.back-link-wrapper {
   text-decoration: none;
+  color: gray;
+
+  &:hover {
+    color: #627cda;
+  }
 }
 .back-link {
   color: gray;

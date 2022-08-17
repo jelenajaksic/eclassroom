@@ -8,12 +8,13 @@
         :label="answer"
         :value="answer"
         class="mb-8"
+        @change="emitAnswer"
       >
         <template #label>
           <div>
             {{ answer }}
           </div>
-          <v-scroll-x-transition>
+          <v-scroll-x-transition v-if="!isTest">
             <v-icon
               v-if="answer === checkedAnswer && answers[index].correct"
               color="success"
@@ -44,6 +45,10 @@ export default {
     answers: {
       type: Array,
       default: () => []
+    },
+    isTest: {
+      type: Boolean,
+      default: false
     }
   },
   data () {
@@ -58,6 +63,14 @@ export default {
     },
     correctAnswer () {
       return this.answers.find(answer => answer.correct === true)?.label
+    }
+  },
+  methods: {
+    emitAnswer () {
+      console.log('answer', this.checkedAnswer === this.correctAnswer)
+      if (this.isTest) {
+        this.$emit('input', this.checkedAnswer === this.correctAnswer)
+      }
     }
   }
 }

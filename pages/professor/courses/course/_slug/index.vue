@@ -9,8 +9,17 @@
       <template slot="headerButtons">
         <app-button label="Delete" button-class="mr-2" :outlined="true" :icon="ICONS.TRASH" @click="openDeleteDialog = true" />
         <app-button label="Edit" button-class="mr-2" :outlined="true" :icon="ICONS.EDIT" @click="editCourse" />
-        <app-button label="Add Student" button-class="mr-2" :icon="ICONS.PLUS" @click="openStudentDialog = true" />
-        <app-button label="New Lesson" :icon="ICONS.PLUS" @click="newLesson" />
+        <!--        <app-button label="Student" button-class="mr-2" :icon="ICONS.PLUS" @click="openStudentDialog = true" />-->
+        <app-button-dropdown
+          label="Student"
+          class="mr-2"
+          display-property=""
+          :icon="ICONS.PLUS"
+          :items="studentTypes"
+          @selected="selectStudentType"
+        />
+        <app-button label="Test" button-class="mr-2" :icon="ICONS.PLUS" @click="newTest" />
+        <app-button label="Lesson" :icon="ICONS.PLUS" @click="newLesson" />
       </template>
       <template slot="navigation">
         <v-breadcrumbs
@@ -65,25 +74,36 @@
     <app-dialog
       v-if="openStudentDialog"
       :open-dialog="openStudentDialog"
-      title="Enroll a New Student"
-      text="Enroll a new student to this course by providing students' name, email and initial password."
+      title="Enroll a Student"
+      :text="showExistingStudent
+        ? 'Enroll an existing student by selecting email from the dropdown.'
+        : 'Enroll a new student to this course by providing name, email and password'"
       primary-button-label="Enroll"
       secondary-button-label="Cancel"
-      :primary-disabled="!studentEmail || !studentName || !studentPassword"
+      :primary-disabled="isEnrollDisabled"
       @secondary="openStudentDialog = false"
       @primary="addStudent"
     >
       <template slot="customDialogContent">
-        <text-input label="Name" :text-input="studentName" @input="setStudentName" />
-        <text-input label="Email" :text-input="studentEmail" @input="setStudentEmail" />
-        <text-input label="Password" :text-input="studentPassword" @input="setStudentPassword" />
+        <div v-if="showExistingStudent">
+          <v-select
+            v-model="existingStudentEmail"
+            :items="existingStudents"
+            label="Select existing student"
+          />
+        </div>
+        <div v-if="showNewStudent">
+          <text-input label="Name" :text-input="studentName" @input="setStudentName" />
+          <text-input label="Email" :text-input="studentEmail" @input="setStudentEmail" />
+          <text-input label="Password" :text-input="studentPassword" @input="setStudentPassword" />
+        </div>
       </template>
     </app-dialog>
     <app-dialog
       v-if="openSuccessDialog"
       :open-dialog="openSuccessDialog"
       title="Success"
-      text="You have successfully enrolled a new student!"
+      text="You have successfully enrolled a student!"
       primary-button-label="Ok"
       @primary="openSuccessDialog = false"
     />
@@ -96,6 +116,7 @@ import AppHeader from '../../../../../components/common/AppHeader'
 import AppButton from '../../../../../components/common/AppButton'
 import AppDialog from '../../../../../components/common/AppDialog'
 import TextInput from '../../../../../components/common/input/TextInput'
+import AppButtonDropdown from '../../../../../components/common/AppButtonDropdown'
 import { ICONS } from '../../../../../common/commonHelper'
 
 export default {
@@ -105,18 +126,23 @@ export default {
     AppHeader,
     AppButton,
     AppDialog,
-    TextInput
+    TextInput,
+    AppButtonDropdown
   },
   data () {
     return {
       ICONS,
+      studentTypes: ['New', 'Existing'],
       model: null,
       openDeleteDialog: false,
       openStudentDialog: false,
       openSuccessDialog: false,
+      showNewStudent: false,
+      showExistingStudent: false,
       studentEmail: '',
       studentName: '',
-      studentPassword: ''
+      studentPassword: '',
+      existingStudentEmail: ''
     }
   },
   computed: {
@@ -136,18 +162,35 @@ export default {
           href: ''
         }
       ]
+    },
+    existingStudents () {
+      return this.$store.getters.getAllStudents
+    },
+    isEnrollDisabled () {
+      if (this.showNewStudent) {
+        return !this.studentEmail || !this.studentName || !this.studentPassword
+      }
+      return !this.existingStudentEmail
     }
   },
   created () {
     this.$store.dispatch('courses/setActiveCourse', this.$route.params?.slug)
   },
   methods: {
+    selectStudentType (type) {
+      this.showNewStudent = type === 'New'
+      this.showExistingStudent = type === 'Existing'
+      this.openStudentDialog = true
+    },
     goToLesson (slug) {
       this.$store.dispatch('courses/setActiveLesson', slug)
       this.$router.push(`/professor/courses/course/${this.course.slug}/lesson/${slug}`)
     },
     newLesson () {
       this.$router.push(`/professor/courses/course/${this.course.slug}/new-lesson`)
+    },
+    newTest () {
+      this.$router.push(`/professor/courses/course/${this.course.slug}/new-test`)
     },
     editCourse () {
       this.$router.push(`/professor/courses/course/${this.course.slug}/edit-course`)
@@ -166,18 +209,32 @@ export default {
       this.studentPassword = pass
     },
     addStudent () {
-      const newStudent = {
-        name: this.studentName,
-        email: this.studentEmail,
-        password: this.studentPassword,
-        admin: false
+      if (this.showNewStudent) {
+        const newStudent = {
+          name: this.studentName,
+          email: this.studentEmail,
+          password: this.studentPassword,
+          admin: false
+        }
+        // eslint-disable-next-line no-return-assign
+        this.$store.dispatch('courses/addStudent', newStudent).then(() => {
+          this.openSuccessDialog = true
+          this.openStudentDialog = false
+        })
+      } else if (this.showExistingStudent) {
+        this.$store.dispatch('courses/enrollExistingStudent', {
+          courseID: this.course.id,
+          email: this.existingStudentEmail
+        }).then(() => {
+          this.openSuccessDialog = true
+          this.openStudentDialog = false
+        })
       }
-      // eslint-disable-next-line no-return-assign
-      this.$store.dispatch('courses/addStudent', newStudent).then(() => {
-        this.openSuccessDialog = true
-        this.studentName = ''
-        this.studentEmail = ''
-        this.studentPassword = ''
+    },
+    getExistingStudents () {
+      this.$store.dispatch('getAllUsers').then(() => {
+        this.showExistingStudent = true
+        this.showNewStudent = false
       })
     }
   }

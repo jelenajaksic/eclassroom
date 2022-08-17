@@ -125,12 +125,12 @@ export default {
     },
     save () {
       this.edit = false
-      const profile = {
+      const userInfo = {
         name: this.name,
-        password: this.newPass,
+        password: this.newPass ? this.newPass : this.oldPass,
         email: this.email
       }
-      this.$store.dispatch('profile/updateProfile', profile)
+      this.$store.dispatch('updateUserInfo', userInfo)
     },
     editProfile () {
       this.edit = true
@@ -138,18 +138,6 @@ export default {
       this.newPass = ''
       this.reenterNewPass = ''
     }
-    // saveEmail () {
-    //   this.edit.email = false
-    //   this.$store.dispatch('profile/updateEmail', this.email)
-    // },
-    // saveName () {
-    //   this.edit.name = false
-    //   this.$store.dispatch('profile/updateName', this.name)
-    // },
-    // savePassword () {
-    //   this.edit.password = false
-    //   this.$store.dispatch('profile/updatePassword', this.newPass)
-    // }
   }
 }
 </script>

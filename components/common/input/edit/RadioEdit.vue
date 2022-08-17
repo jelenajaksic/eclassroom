@@ -64,7 +64,7 @@ export default {
         correct: false
       })
       this.$nextTick(() => this.$refs[`question-${this.newSection.id}-answer-${this.newSection.question.answers.length - 1}`][0].focus())
-      this.$emit('update', this.newSection)
+      this.$emit('update', this.newSection.question.answers)
     },
     removeAnswer (index) {
       this.newSection.question.answers.splice(index, 1)
@@ -79,7 +79,7 @@ export default {
       this.newSection.question.answers.forEach((answer, index) => {
         answer.correct = index === targetIndex
       })
-      this.$emit('update', this.newSection)
+      this.$emit('update', this.newSection.question.answers)
     }
   }
 }

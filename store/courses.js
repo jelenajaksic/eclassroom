@@ -13,23 +13,6 @@ export const mutations = {
   },
   setActiveLesson (state, slug) {
     state.activeLessonSlug = slug
-  },
-  addCourse (state, course) {
-    state.courses.push(course)
-  },
-  addStudent (state, student) {},
-  deleteCourse (state, courseID) {
-    state.courses.splice(courseID, 1)
-    // eslint-disable-next-line no-return-assign
-    state.courses.forEach(course => course.id = state.courses.indexOf(course))
-  },
-  updateCourse (state, course) {
-    state.courses[course.id] = {
-      ...state.courses[course.id],
-      title: course.title,
-      description: course.description,
-      shortDescription: course.shortDescription
-    }
   }
 }
 
@@ -44,17 +27,54 @@ export const actions = {
   setActiveLesson ({ commit }, slug) {
     commit('setActiveLesson', slug)
   },
-  addCourse ({ commit }, course) {
-    commit('addCourse', course)
+  async addCourse ({ commit }, course) {
+    await this.$axios.$post('api/courses/add-course', course)
+    await this.getAllCourses
   },
-  deleteCourse ({ commit }, courseID) {
-    commit('deleteCourse', courseID)
+  async deleteCourse ({ commit }, courseID) {
+    await this.$axios.$post('api/courses/delete-course', courseID)
+    await this.getAllCourses
   },
-  updateCourse ({ commit }, course) {
-    commit('updateCourse', course)
+  async updateCourse ({ commit }, course) {
+    await this.$axios.$post('api/courses/update-course', course)
+    await this.getAllCourses
   },
-  addStudent ({ commit }, student) {
-    commit('addStudent', student)
+  async addStudent ({ commit }, { courseID, student }) {
+    await this.$axios.$post('api/courses/add-student', {
+      course_id: courseID,
+      student
+    })
+  },
+  async enrollExistingStudent ({ commit }, { courseID, email }) {
+    await this.$axios.$post('api/courses/enroll-student', {
+      course_id: courseID,
+      email
+    })
+  },
+  async addLesson ({ commit }, { courseID, lesson }) {
+    await this.$axios.$post('api/courses/add-lesson', {
+      course_id: courseID,
+      lesson
+    })
+    await this.getAllCourses
+  },
+  async addTest ({ commit }, { courseID, test }) {
+    await this.$axios.$post('api/courses/add-test', {
+      course_id: courseID,
+      test
+    })
+    await this.getAllCourses
+  },
+  async updateLesson ({ commit }, { courseID, lesson }) {
+    await this.$axios.$post('api/courses/update-lesson', {
+      course_id: courseID,
+      lesson
+    })
+    await this.getAllCourses
+  },
+  async deleteLesson ({ commit }, lessonID) {
+    await this.$axios.$post('api/courses/delete-lesson', lessonID)
+    await this.getAllCourses
   }
 }
 
@@ -68,8 +88,5 @@ export const getters = {
   getActiveLesson (state) {
     return state.courses.find(course => course.slug === state.activeCourseSlug).lessons
       .find(lesson => lesson.slug === state.activeLessonSlug)
-  },
-  getNewCourseSlug (state) {
-    return `course-${state.courses.length}`
   }
 }

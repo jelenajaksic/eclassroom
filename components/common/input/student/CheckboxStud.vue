@@ -5,9 +5,9 @@
         :id="`${answer.label}-${index}`"
         v-model="answer.correct"
         :label="answer.label"
-        @input="$emit('input', studentAnswers)"
+        @select="emitAnswer"
       />
-      <v-scroll-x-transition>
+      <v-scroll-x-transition v-if="!isTest">
         <v-icon
           v-if="answer.correct && answers[index].correct"
           color="success"
@@ -36,6 +36,10 @@ export default {
     answers: {
       type: Array,
       default: () => []
+    },
+    isTest: {
+      type: Boolean,
+      default: false
     }
   },
   data () {
@@ -49,6 +53,20 @@ export default {
       ...answer,
       correct: false
     }))
+  },
+  methods: {
+    emitAnswer () {
+      if (this.isTest) {
+        let isAnswerCorrect = true
+        this.studentAnswers.forEach((answer, index) => {
+          if (isAnswerCorrect) {
+            isAnswerCorrect = this.answers[index].correct === answer.correct
+          }
+        })
+        console.log(isAnswerCorrect)
+        this.$emit('input', isAnswerCorrect)
+      }
+    }
   }
 }
 </script>
@@ -56,5 +74,8 @@ export default {
 <style lang="scss" scoped>
 .checkbox-wrapper {
   display: flex;
+}
+.v-input--checkbox {
+  margin: 0;
 }
 </style>

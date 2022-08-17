@@ -2,21 +2,27 @@
   <v-hover>
     <template #default="{ hover }">
       <v-card class="pa-10 mt-10" :elevation="hover ? 2 : 0">
-        <!--        TODO: If dragable enabled      -->
-        <!--      <v-card class="pa-10 mt-10" :elevation="hover ? 2 : 0" :class="{ 'cursor-grab': hover }">-->
-        <!--        <v-card-actions class="justify-center">-->
-        <!--          <v-icon-->
-        <!--            right-->
-        <!--            light-->
-        <!--          >-->
-        <!--            {{ ICONS.DRAG_HORIZONTAL }}-->
-        <!--          </v-icon>-->
-        <!--        </v-card-actions>-->
         <v-card-actions class="justify-end">
           <v-icon
             right
             light
-            @click="$emit('duplicate', newSection)"
+            @click="$emit('move-up')"
+          >
+            {{ ICONS.ARROW_UP }}
+          </v-icon>
+          <v-icon
+            right
+            light
+            class="mr-4"
+            @click="$emit('move-down')"
+          >
+            {{ ICONS.ARROW_DOWN }}
+          </v-icon>
+          <v-icon
+            right
+            light
+            class="mr-4"
+            @click="$emit('duplicate')"
           >
             {{ ICONS.COPY }}
           </v-icon>
@@ -28,11 +34,6 @@
             {{ ICONS.TRASH }}
           </v-icon>
         </v-card-actions>
-        <!--        <div v-if="section.type === SECTION_TYPES.TEXT">-->
-        <!--          <v-text-field-->
-        <!--            v-model="newSection.title"-->
-        <!--            label="Title"-->
-        <!--          />-->
         <v-textarea
           v-model="newSection.title"
           label="Title"
@@ -40,6 +41,7 @@
           auto-grow
           clearable-icon
           rows="1"
+          @input="updateSection"
         />
         <v-textarea
           v-model="newSection.description"
@@ -48,16 +50,16 @@
           auto-grow
           clearable-icon
           rows="1"
+          @input="updateSection"
         />
-        <v-textarea
+        <v-file-input
           v-model="newSection.image"
+          show-size
+          small-chips
+          :prepend-icon="ICONS.CAMERA"
           label="Image"
-          type="textarea"
-          auto-grow
-          clearable-icon
-          rows="1"
+          @input="updateSection"
         />
-        <!--        </div>-->
         <div v-if="newSection.type === SECTION_TYPES.QUESTION">
           <v-textarea
             v-model="newSection.question.description"
@@ -66,6 +68,7 @@
             auto-grow
             clearable-icon
             rows="1"
+            @input="updateSection"
           />
           <app-button-dropdown
             v-if="displayQuestionTypeButton"
@@ -91,7 +94,7 @@
                     left
                     light
                     class="mr-5"
-                    @click="answer.correct = !answer.correct"
+                    @click="answer.correct = !answer.correct;"
                   >
                     {{ answer.correct ? ICONS.MULTISELECT_MARKED : ICONS.MULTISELECT_BLANK }}
                   </v-icon>
@@ -169,6 +172,10 @@ export default {
     section: {
       type: Object,
       default: () => {}
+    },
+    reload: {
+      type: Boolean,
+      default: false
     }
   },
   data () {
@@ -178,46 +185,24 @@ export default {
       SECTION_TYPES,
       questionTypes: QUESTIONS,
       sectionId: this.section.id,
-      newSection: {
-        shortDescription: this.section.shortDescription,
-        // title: this.section.title,
-        id: this.section.id,
-        title: this.section.title,
-        description: this.section.description,
-        image: this.section.image,
-        type: this.section.type,
-        question: {
-          type: this.section?.question?.type || '',
-          description: this.section?.question?.description || '',
-          answers: this.section?.question?.answers || []
-        }
-      }
+      newSection: JSON.parse(JSON.stringify(this.section))
     }
   },
   computed: {
-    // description: {
-    //   get () {
-    //     // return this.$store.getters['lesson/getSectionDescriptionById'](this.sectionId)
-    //     return 'desc'
-    //   },
-    //   set (value) {
-    //     this.$store.dispatch('lesson/updateSectionDescription', { sectionId: this.sectionId, description: value })
-    //   }
-    // },
     displayQuestionTypeButton () {
       return !this.newSection.question.type || (this.newSection.question.type !== QUESTION_TYPES.TEXT && this.newSection.question.answers.length === 0)
     }
   },
-  // updated () {
-  //   this.$emit('update-section', this.newSection)
-  // },
   methods: {
+    updateSection () {
+      this.$emit('update-section', this.newSection)
+    },
     addQuestion (item) {
-      // this.$store.dispatch('lesson/addQuestion', { type: item.slug, sectionId: this.sectionId })
       this.newSection.question.type = item.slug
       if (this.newSection.question.type === QUESTION_TYPES.MULTISELECT || this.newSection.question.type === QUESTION_TYPES.SINGLE_SELECT) {
         this.addAnswer()
       }
+      this.updateSection()
     },
     addAnswer () {
       this.newSection.question.answers.push({
@@ -225,19 +210,20 @@ export default {
         correct: false
       })
       this.$nextTick(() => this.$refs[`question-${this.newSection.id}-answer-${this.newSection.question.answers.length - 1}`][0].focus())
+      this.updateSection()
     },
     removeAnswer (index) {
       this.newSection.question.answers.splice(index, 1)
-      // eslint-disable-next-line no-return-assign
-      this.newSection.question.answers.forEach(s => s.id = this.newSection.question.answers.indexOf(s))
+      this.newSection.question.answers.forEach((answer) => {
+        answer.id = this.newSection.question.answers.indexOf(answer)
+      })
+      this.updateSection()
     },
     radioSelectCorrect (targetIndex) {
-      // // eslint-disable-next-line no-return-assign
-      // this.newSection.question.answers[ind].correct = true
-      // eslint-disable-next-line no-return-assign
       this.newSection.question.answers.forEach((answer, index) => {
         answer.correct = index === targetIndex
       })
+      this.updateSection()
     }
   }
 }

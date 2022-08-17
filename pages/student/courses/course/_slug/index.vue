@@ -24,7 +24,7 @@
       </v-row>
       <v-row>
         <v-col>
-          <div class="page-divider"/>
+          <div class="page-divider" />
         </v-col>
       </v-row>
       <v-row v-if="course.lessons.length">
@@ -72,9 +72,12 @@ export default {
   },
   methods: {
     goToLesson (slug) {
+      this.$store.dispatch('courses/setActiveLesson', slug)
       this.$router.push(`/student/courses/course/${this.course.slug}/lesson/${slug}`)
     },
-    goToTest () {}
+    goToTest () {
+      this.$router.push(`/student/courses/course/${this.course.slug}/test`)
+    }
   }
 }
 </script>
