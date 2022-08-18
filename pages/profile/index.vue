@@ -128,7 +128,8 @@ export default {
       const userInfo = {
         name: this.name,
         password: this.newPass ? this.newPass : this.oldPass,
-        email: this.email
+        email: this.email,
+        admin: this.profileData.admin
       }
       this.$store.dispatch('updateUserInfo', userInfo)
     },

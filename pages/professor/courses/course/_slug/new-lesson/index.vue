@@ -70,6 +70,14 @@
       @secondary="openDialog = false"
       @primary="onPrimaryAction"
     />
+    <app-dialog
+      v-if="openSuccessDialog"
+      :open-dialog="openSuccessDialog"
+      title="Success"
+      text="You have successfully created a lesson!"
+      primary-button-label="Back to Course"
+      @primary="onPrimaryAction"
+    />
   </div>
 </template>
 
@@ -100,6 +108,7 @@ export default {
       shortDescription: '',
       image: null,
       openDialog: false,
+      openSuccessDialog: false,
       reload: false
     }
   },
@@ -113,10 +122,8 @@ export default {
       this.openDialog = true
     },
     async onSave () {
-      this.$router.go(-1)
       const newLesson = {
-        // TODO: add uuid
-        id: '',
+        // id: uuidV4(),
         slug: slugFromTitle(this.title),
         sections: JSON.parse(JSON.stringify(this.sections)),
         title: this.title,
@@ -128,11 +135,12 @@ export default {
         courseID: this.course.id,
         lesson: newLesson
       })
-      // TODO: add popup
+      this.openSuccessDialog = true
     },
     addSection (item) {
       this.sections.push({
         // TODO: add uuid
+        // id: uuidV4(),
         title: '',
         description: '',
         shortDescription: '',

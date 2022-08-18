@@ -12,7 +12,7 @@
           height="200px"
         />
         <v-overlay
-          v-if="data.shortDescription && !isLesson"
+          v-if="data.shortDescription && !isLesson && !isTest"
           absolute
           color="white"
           :value="hover"
@@ -31,10 +31,13 @@
         <v-card-subtitle v-if="data.shortDescription && isLesson">
           {{ data.shortDescription }}
         </v-card-subtitle>
+        <v-card-subtitle v-if="isTest && studentProgress">
+          {{ `Your previous score: ${studentProgress}%` }}
+        </v-card-subtitle>
         <v-progress-linear
-          v-if="hasStudentProgress"
+          v-if="userRole === USERS.STUDENT && (isTest || isLesson)"
           rounded
-          :value="studentProgress"
+          :value="studentProgressFormatted"
         />
       </v-card>
     </template>
@@ -54,6 +57,10 @@ export default {
     isLesson: {
       type: Boolean,
       default: false
+    },
+    isTest: {
+      type: Boolean,
+      default: false
     }
   },
   data () {
@@ -69,12 +76,11 @@ export default {
     userRole () {
       return this.$store.getters.getUserRole
     },
-    hasStudentProgress () {
-      // return this.userRole === USERS.STUDENT && (this.data.students[this.user.email]?.length > 0)
-      return false
-    },
     studentProgress () {
-      return this.isLesson ? this.data.students[this.user.email].find(lesson => lesson.id === this.data.id).progress : '0'
+      return this.data.students[this.user.email]
+    },
+    studentProgressFormatted () {
+      return this.isLesson ? Math.round(((this.studentProgress + 1) / this.data.sections.length) * 100) : this.studentProgress
     }
   }
 }

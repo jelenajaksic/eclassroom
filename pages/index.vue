@@ -2,12 +2,12 @@
   <v-form ref="form" v-model="valid" lazy-validation style="max-height: 100vh; overflow: hidden;">
     <v-container>
       <v-row style="height: 90vh;" align="center">
-        <v-col cols="12" md="4">
-          <v-row style="color: whitesmoke;" class="mb-16">
-            <h1 style="font-size: 3.5rem;">
+        <v-col cols="12" md="5" lg="5">
+          <v-row style="color: #39374b;" class="mb-16">
+            <h1 style="font-size: 3.5rem; font-weight: 500;">
               Welcome back!
             </h1>
-            <h3 style="font-weight: normal;">
+            <h3 style="font-weight: normal; color: #39374b; margin-top: -0.25rem; margin-left: 0.5rem;">
               {{ showForgotPassword ? 'Enter your email to reset your password' : 'Please log in to your account' }}
             </h3>
           </v-row>
@@ -21,6 +21,7 @@
               required
               background-color="white"
               rounded
+              color="#100259"
             />
           </v-row>
           <v-row>
@@ -49,8 +50,8 @@
             />
           </v-row>
         </v-col>
-        <v-col cols="12" md="4" />
-        <v-col cols="12" md="4">
+        <v-col cols="12" md="1" lg="1" />
+        <v-col cols="12" md="6" lg="6">
           <v-img src="abacus.png" />
         </v-col>
       </v-row>
@@ -122,7 +123,7 @@ export default {
 
 <style lang="scss" scoped>
 .forgot-pass-btn {
-  color: whitesmoke;
+  color: #39374b;
   font-size: 12px;
   text-decoration: underline;
   cursor: pointer;

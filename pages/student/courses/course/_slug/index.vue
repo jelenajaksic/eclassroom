@@ -5,7 +5,12 @@
         <h1> {{ course.title }} </h1>
       </template>
       <template slot="headerButtons">
-        <app-button label="Take the final test" class="mr-4" @click="goToTest" />
+        <a href="#lessons">
+          <app-button label="See lessons" class="mr-4" />
+        </a>
+        <a href="#tests">
+          <app-button label="See tests" class="mr-4" />
+        </a>
       </template>
     </app-header>
     <v-container>
@@ -22,12 +27,12 @@
           </p>
         </v-col>
       </v-row>
-      <v-row>
+      <v-row v-if="course.lessons.length">
         <v-col>
           <div class="page-divider" />
         </v-col>
       </v-row>
-      <v-row v-if="course.lessons.length">
+      <v-row v-if="course.lessons.length" id="lessons">
         <v-col>
           <h2 class="mb-2">
             Lessons
@@ -37,6 +42,23 @@
       <v-row v-if="course.lessons.length">
         <v-col v-for="lesson in course.lessons" :key="lesson.slug" lg="3">
           <course-card :data="lesson" :is-lesson="true" @select="goToLesson" />
+        </v-col>
+      </v-row>
+      <v-row>
+        <v-col>
+          <div class="page-divider" />
+        </v-col>
+      </v-row>
+      <v-row v-if="course.tests.length" id="tests">
+        <v-col>
+          <h2 class="mb-2">
+            Tests
+          </h2>
+        </v-col>
+      </v-row>
+      <v-row v-if="course.tests.length" style="min-height: 100vh;">
+        <v-col v-for="test in course.tests" :key="test.slug" lg="3">
+          <course-card :data="test" :is-test="true" @select="goToTest" />
         </v-col>
       </v-row>
     </v-container>
@@ -75,8 +97,9 @@ export default {
       this.$store.dispatch('courses/setActiveLesson', slug)
       this.$router.push(`/student/courses/course/${this.course.slug}/lesson/${slug}`)
     },
-    goToTest () {
-      this.$router.push(`/student/courses/course/${this.course.slug}/test`)
+    goToTest (slug) {
+      this.$store.dispatch('courses/setActiveTest', slug)
+      this.$router.push(`/student/courses/course/${this.course.slug}/test/${slug}`)
     }
   }
 }

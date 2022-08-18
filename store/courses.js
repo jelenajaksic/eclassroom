@@ -1,31 +1,45 @@
 export const state = () => ({
   courses: {},
   activeCourseSlug: '',
-  activeLessonSlug: ''
+  activeLessonSlug: '',
+  activeTestSlug: '',
+  studentEmail: ''
 })
 
 export const mutations = {
   setCourses (state, courses) {
     state.courses = courses
   },
+  setStudent (state, studentEmail) {
+    state.studentEmail = studentEmail
+  },
   setActiveCourse (state, slug) {
     state.activeCourseSlug = slug
   },
   setActiveLesson (state, slug) {
     state.activeLessonSlug = slug
+  },
+  setActiveTest (state, slug) {
+    state.activeTestSlug = slug
   }
 }
 
 export const actions = {
-  async getAllCourses ({ commit }) {
+  async getAllCourses ({ commit }, studentEmail = '') {
     const response = await this.$axios.$post('api/courses/get_all')
     commit('setCourses', response)
+    if (studentEmail) {
+      commit('setStudent', studentEmail)
+    }
   },
   setActiveCourse ({ commit }, slug) {
     commit('setActiveCourse', slug)
   },
   setActiveLesson ({ commit }, slug) {
     commit('setActiveLesson', slug)
+  },
+  setActiveTest ({ commit }, slug) {
+    commit('setActiveTest', slug)
   },
   async addCourse ({ commit }, course) {
     await this.$axios.$post('api/courses/add-course', course)
@@ -88,5 +102,21 @@ export const getters = {
   getActiveLesson (state) {
     return state.courses.find(course => course.slug === state.activeCourseSlug).lessons
       .find(lesson => lesson.slug === state.activeLessonSlug)
+  },
+  getActiveTest (state) {
+    return state.courses.find(course => course.slug === state.activeCourseSlug).tests
+      .find(test => test.slug === state.activeTestSlug)
   }
+  // getLessonProgress (state) {
+  //   return state.courses.find(course => course.slug === state.activeCourseSlug)?.lessons.length
+  //     ? state.courses.find(course => course.slug === state.activeCourseSlug)
+  //       .students[state.studentEmail].lessons[state.activeLessonSlug]
+  //     : '0'
+  // },
+  // getTestProgress (state) {
+  //   return state.courses.find(course => course.slug === state.activeCourseSlug)?.tests.length
+  //     ? state.courses.find(course => course.slug === state.activeCourseSlug)
+  //       .students[state.studentEmail].tests[state.activeTestSlug]
+  //     : '0'
+  // }
 }

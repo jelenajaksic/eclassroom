@@ -2,7 +2,12 @@
   <div v-if="lesson">
     <app-header>
       <template slot="title">
-        <h1> {{ lesson.title }} </h1>
+        <h1>
+          {{ lesson.title }}
+          <span v-if="lesson.sections.length" style="font-size: 1.5rem; font-weight: normal; display: inline-block;">
+            {{ `(${currentSection + 1}/${lesson.sections.length})` }}
+          </span>
+        </h1>
       </template>
       <template slot="headerButtons">
         <app-button v-if="displayOverview" :label="overviewButtonLabel" class="mr-4" @click="startLesson" />
@@ -45,11 +50,9 @@
       v-if="openDialog"
       :open-dialog="openDialog"
       title="Lesson completed!"
-      text="Continue to the next lesson or go back to course page."
-      primary-button-label="Next Lesson"
-      secondary-button-label="Back To Course"
-      @secondary="backToCourse"
-      @primary="goToNextLesson"
+      text="You can go back to course page, and proceed to the next lesson or take a test."
+      primary-button-label="Back to Course"
+      @primary="backToCourse"
     />
   </div>
 </template>
@@ -82,6 +85,9 @@ export default {
     }
   },
   computed: {
+    user () {
+      return this.$store.getters.getUser
+    },
     breadcrumbsItems () {
       return [
         {
@@ -107,6 +113,12 @@ export default {
     activeCourse () {
       return this.$store.getters['courses/getActiveCourse']
     },
+    lessonProgress () {
+      return this.lesson.students[this.user.email]
+    },
+    lessonProgressFormatted () {
+      return Math.round((this.lessonProgress / this.lesson.sections.length) * 100)
+    },
     isProgressComplete () {
       return this.currentSection === this.lesson.sections.length - 1
     },
@@ -114,21 +126,24 @@ export default {
       return this.isProgressComplete ? 'Done' : 'Next'
     },
     overviewButtonLabel () {
+      if (this.isProgressComplete) {
+        return 'Restart Lesson'
+      }
       return this.currentSection ? 'Continue Lesson' : 'Start Lesson'
     },
     progress () {
       return this.openDialog ? 100 : Math.round((this.currentSection / this.lesson.sections.length) * 100)
     }
   },
+  mounted () {
+    this.currentSection = Number(this.lessonProgress)
+  },
   methods: {
-    // saveProgress () {
-    //   this.$router.go(-1)
-    // },
     startLesson () {
       // TODO: implement
       this.displayOverview = false
-      if (this.lesson.progress === 100) {
-        this.$store.dispatch('student-lesson/resetProgress')
+      if (this.lesson.sections.length === (this.currentSection + 1)) {
+        this.currentSection = 0
       }
     },
     updateCurrentSection (index) {
@@ -136,16 +151,10 @@ export default {
       // this.$store.dispatch('student-lesson/updateCurrentSection', index)
     },
     completeLesson () {
-      this.$store.dispatch('student-lesson/completeLesson')
+      // this.$store.dispatch('student-lesson/completeLesson')
       this.openDialog = true
-      // this.$router.go(-1)
-    },
-    goToNextLesson () {
-      this.openDialog = false
-      this.displayOverview = true
     },
     backToCourse () {
-      // this.openDialog = false
       this.$router.go(-1)
     }
   }

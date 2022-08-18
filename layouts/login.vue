@@ -16,7 +16,8 @@ export default {
 
 <style lang="scss" scoped>
 .background-dark {
-  background-color: #314a5e;
+  //background-color: #314a5e;
+  background-color: #dae9fe;
   width: 100%;
   height: 100%;
   margin: 0;

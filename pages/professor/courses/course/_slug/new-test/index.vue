@@ -31,13 +31,12 @@
             clearable-icon
             rows="1"
           />
-          <v-textarea
+          <v-file-input
             v-model="image"
+            show-size
+            small-chips
+            :prepend-icon="ICONS.CAMERA"
             label="Image"
-            type="textarea"
-            auto-grow
-            clearable-icon
-            rows="1"
           />
         </v-card>
       </template>
@@ -99,7 +98,7 @@ export default {
       title: '',
       description: '',
       shortDescription: '',
-      image: '',
+      image: null,
       reload: false,
       openDialog: false
     }
@@ -117,7 +116,7 @@ export default {
       this.$router.go(-1)
       const newTest = {
         // TODO: add uuid
-        id: '',
+        // id: '',
         slug: slugFromTitle(this.title),
         sections: JSON.parse(JSON.stringify(this.sections)),
         title: this.title,
@@ -167,7 +166,6 @@ export default {
       this.reload = !this.reload
     },
     onPrimaryAction () {
-      // TODO: redirect to course
       this.$router.go(-1)
     }
   }

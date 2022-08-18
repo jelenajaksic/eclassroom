@@ -1,6 +1,14 @@
 //@import url('https://fonts.googleapis.com/css2?family=Koulen&display=swap');
 @import url('https://fonts.googleapis.com/css2?family=Space+Mono&display=swap');
 
+h1, h2, h3, p {
+  color: #39374b;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
 .logo {
   //font-family: 'Koulen', cursive;
   font-family: 'Space Mono', monospace;

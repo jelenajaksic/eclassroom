@@ -36,10 +36,13 @@ export default {
   computed: {
     courses () {
       return this.$store.getters['courses/getCourses']
+    },
+    user () {
+      return this.$store.getters.getUser
     }
   },
   created () {
-    this.$store.dispatch('courses/getAllCourses')
+    this.$store.dispatch('courses/getAllCourses', this.user.email)
   },
   methods: {
     goToCourse (slug) {

@@ -9,7 +9,6 @@
       <template slot="headerButtons">
         <app-button label="Delete" button-class="mr-2" :outlined="true" :icon="ICONS.TRASH" @click="openDeleteDialog = true" />
         <app-button label="Edit" button-class="mr-2" :outlined="true" :icon="ICONS.EDIT" @click="editCourse" />
-        <!--        <app-button label="Student" button-class="mr-2" :icon="ICONS.PLUS" @click="openStudentDialog = true" />-->
         <app-button-dropdown
           label="Student"
           class="mr-2"
@@ -43,7 +42,7 @@
           </p>
         </v-col>
       </v-row>
-      <v-row>
+      <v-row v-if="course.lessons.length">
         <v-col>
           <div class="page-divider" />
         </v-col>
@@ -58,6 +57,23 @@
       <v-row v-if="course.lessons.length">
         <v-col v-for="lesson in course.lessons" :key="lesson.slug" lg="3">
           <course-card :data="lesson" :is-lesson="true" @select="goToLesson" />
+        </v-col>
+      </v-row>
+      <v-row v-if="course.lessons.length">
+        <v-col>
+          <div class="page-divider" />
+        </v-col>
+      </v-row>
+      <v-row v-if="course.lessons.length">
+        <v-col>
+          <h2 class="mb-2">
+            Tests
+          </h2>
+        </v-col>
+      </v-row>
+      <v-row v-if="course.lessons.length">
+        <v-col v-for="lesson in course.lessons" :key="lesson.slug" lg="3">
+          <course-card :data="lesson" :is-test="true" @select="goToLesson" />
         </v-col>
       </v-row>
     </v-container>
@@ -181,6 +197,9 @@ export default {
       this.showNewStudent = type === 'New'
       this.showExistingStudent = type === 'Existing'
       this.openStudentDialog = true
+      if (this.showExistingStudent) {
+        this.getExistingStudents()
+      }
     },
     goToLesson (slug) {
       this.$store.dispatch('courses/setActiveLesson', slug)
@@ -231,11 +250,8 @@ export default {
         })
       }
     },
-    getExistingStudents () {
-      this.$store.dispatch('getAllUsers').then(() => {
-        this.showExistingStudent = true
-        this.showNewStudent = false
-      })
+    async getExistingStudents () {
+      await this.$store.dispatch('getAllUsers')
     }
   }
 }

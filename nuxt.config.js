@@ -1,13 +1,13 @@
 import colors from 'vuetify/es5/util/colors'
 
 export default {
-  // Target: https://go.nuxtjs.dev/config-target
-  target: 'static',
-  mode: 'spa',
+  // Disable server-side rendering: https://go.nuxtjs.dev/ssr-mode
+  ssr: false,
+
   // Global page headers: https://go.nuxtjs.dev/config-head
   head: {
-    titleTemplate: '%s',
-    title: 'e-classroom',
+    titleTemplate: '%s - eclassroom',
+    title: 'eclassroom',
     htmlAttrs: {
       lang: 'en'
     },
@@ -52,7 +52,6 @@ export default {
   // Axios module configuration: https://go.nuxtjs.dev/config-axios
   axios: {
     // Workaround to avoid enforcing hard-coded localhost:3000: https://github.com/nuxt-community/axios-module/issues/308
-    // baseURL: 'http://localhost:8080',
     proxy: true
   },
 
@@ -65,17 +64,14 @@ export default {
     customVariables: ['~/assets/scss/common.scss'],
     theme: {
       dark: false,
-      themes: {
-        light: {
-          primary: '#627cda',
-          // primary: '#54c1ed',
-          accent: '#54c1ed',
-          secondary: '#aac0f0',
-          info: colors.teal.lighten1,
-          warning: colors.amber.base,
-          error: colors.deepOrange.accent4,
-          success: colors.green.accent3
-        }
+      light: {
+        primary: '#627cda',
+        // accent: '#54c1ed',
+        secondary: '#aac0f0',
+        info: colors.teal.lighten1,
+        warning: colors.amber.base,
+        error: colors.deepOrange.accent4,
+        success: colors.green.accent3
       }
     }
   },
@@ -92,11 +88,3 @@ export default {
     }
   }
 }
-
-// primary: '#54c1ed',
-//   secondary: '#4bddc6',
-//   white: '#e7eaef',
-//   dark: '#2d495e',
-//   warning: '#ffd15c',
-//   error: '#f1543d',
-//   success: '#abcc55'
