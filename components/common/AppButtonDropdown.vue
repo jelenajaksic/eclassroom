@@ -117,11 +117,6 @@ export default {
 
       cursor: pointer;
       font-size: .875rem;
-      //color: $navy;
-      //
-      //&:hover {
-      //  background-color: $gray5;
-      //}
     }
   }
 }

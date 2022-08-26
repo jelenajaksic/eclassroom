@@ -60,7 +60,6 @@ export default {
   methods: {
     emitAnswer () {
       if (this.isTest) {
-        console.log(this.answer === this.correctAnswer)
         this.$emit('input', this.answer === this.correctAnswer)
       }
     }

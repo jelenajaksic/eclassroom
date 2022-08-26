@@ -3,7 +3,7 @@
     <AppHeader>
       <template slot="title">
         <h1>
-          Profile
+          Your Profile
         </h1>
       </template>
       <template slot="headerButtons">
@@ -45,6 +45,7 @@
               v-if="edit"
               v-model="oldPass"
               type="password"
+              required
               label="Old Password"
               :rules="oldPasswordRules"
             />
@@ -65,13 +66,23 @@
         </v-col>
       </v-row>
     </v-container>
+    <v-alert
+      v-model="displayAlert"
+      dismissible
+      :type="alertType"
+      dense
+      style="position: absolute; top: 92vh; right: 2rem; width: 96%;"
+      transition="scale-transition"
+    >
+      {{ alertMessage }}
+    </v-alert>
   </div>
 </template>
 
 <script>
 import AppHeader from '../../components/common/AppHeader'
 import AppButton from '../../components/common/AppButton'
-import { ICONS } from '../../common/commonHelper'
+import { ICONS, ALERT_TYPES } from '../../common/commonHelper'
 
 export default {
   name: 'ProfilePage',
@@ -81,6 +92,9 @@ export default {
   },
   data () {
     return {
+      displayAlert: false,
+      alertType: ALERT_TYPES.ERROR,
+      alertMessage: '',
       name: '',
       email: '',
       password: '',
@@ -95,6 +109,7 @@ export default {
         v => /.+@.+/.test(v) || 'E-mail must be valid'
       ],
       oldPasswordRules: [
+        v => !!v || 'Password is required',
         v => v === this.profileData.password || 'Password is incorrect'
       ],
       reenterNewPassRules: [
@@ -123,15 +138,24 @@ export default {
       this.edit = false
       this.initProfileData()
     },
-    save () {
-      this.edit = false
-      const userInfo = {
-        name: this.name,
-        password: this.newPass ? this.newPass : this.oldPass,
-        email: this.email,
-        admin: this.profileData.admin
+    async save () {
+      try {
+        const userInfo = {
+          id: this.profileData._id,
+          name: this.name,
+          password: this.newPass ? this.newPass : this.oldPass,
+          email: this.email,
+          admin: this.profileData.admin
+        }
+        await this.$store.dispatch('updateUserInfo', userInfo)
+      } catch (e) {
+        this.initProfileData()
+        this.alertType = ALERT_TYPES.ERROR
+        this.alertMessage = e.message
+        this.displayAlert = true
+      } finally {
+        this.edit = false
       }
-      this.$store.dispatch('updateUserInfo', userInfo)
     },
     editProfile () {
       this.edit = true

@@ -24,13 +24,13 @@ export const actions = {
     const response = await this.$axios.$post('api/login', loginData)
     commit('setUser', response)
     if (response?.admin) {
-      await this.$router.push('/professor/courses')
+      await this.$router.push('/professor')
     } else {
-      await this.$router.push('/student/courses')
+      await this.$router.push('/student')
     }
   },
   async resetPassword ({ commit }, email) {
-    await this.$axios.$post('api/reset-password', email)
+    await this.$axios.$post('api/reset-password', { email })
   },
   logout ({ commit }) {
     commit('setUser', {})

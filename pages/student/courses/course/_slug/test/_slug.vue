@@ -2,7 +2,7 @@
   <div v-if="test">
     <app-header>
       <template slot="title">
-        <h1 style="width: fit-content">
+        <h1 style="width: max-content;">
           {{ test.title }}
           <span v-if="test.sections.length" style="font-size: 1.5rem; font-weight: normal; display: inline;">
             {{ `(${currentQuestion + 1}/${test.sections.length})` }}
@@ -22,7 +22,11 @@
         />
       </template>
       <template slot="navigation">
-        <app-back-button label="< Back to Course" :link="`/student/courses/course/${course.slug}`" />
+        <app-back-button
+          :label="`< Back to ${course.title}`"
+          :link="`/student/courses/course/${course.slug}`"
+          @click="saveProgress"
+        />
       </template>
     </app-header>
     <v-progress-linear
@@ -37,7 +41,7 @@
     <app-dialog
       v-if="openDialog"
       :open-dialog="openDialog"
-      :title="`Your score: ${finalScorePercentage()}`"
+      :title="`Your score: ${finalScorePercentage()}%`"
       text="You have completed the final test for this course."
       primary-button-label="Back To Course"
       @primary="backToCourse"
@@ -70,10 +74,14 @@ export default {
       openDialog: false,
       currentQuestion: 0,
       score: {},
-      finalScore: 0
+      finalScore: 0,
+      previousScore: 0
     }
   },
   computed: {
+    user () {
+      return this.$store.getters.getUser
+    },
     course () {
       return this.$store.getters['courses/getActiveCourse']
     },
@@ -94,6 +102,7 @@ export default {
     this.test.sections.forEach((section) => {
       this.score[section.id] = false
     })
+    this.previousScore = parseInt(this.test.students[this.user.email])
   },
   methods: {
     decrementSection () {
@@ -106,7 +115,8 @@ export default {
         this.currentQuestion = this.currentQuestion + 1
       }
     },
-    finishTest () {
+    async finishTest () {
+      await this.saveProgress()
       this.openDialog = true
     },
     backToCourse () {
@@ -123,9 +133,19 @@ export default {
             this.finalScore = this.finalScore + 1
           }
         })
-        return this.finalScore === this.test.sections.length ? '100%' : `${Math.round((this.finalScore / this.test.sections.length) * 100)}%`
+        return this.finalScore === this.test.sections.length ? '100' : `${Math.round((this.finalScore / this.test.sections.length) * 100)}`
       }
-      return '0%'
+      return '0'
+    },
+    async saveProgress () {
+      if (parseInt(this.finalScorePercentage()) > this.previousScore) {
+        await this.$store.dispatch('courses/updateTestProgress', {
+          courseID: this.course._id,
+          testID: this.test._id,
+          score: this.finalScorePercentage(),
+          studentEmail: this.user.email
+        })
+      }
     }
   }
 }

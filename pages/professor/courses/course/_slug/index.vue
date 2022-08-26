@@ -31,12 +31,17 @@
     <v-container>
       <v-row class="course-overview-wrapper" align="center">
         <v-col v-if="course.image" cols="12" md="6" lg="6">
+<!--          <v-img-->
+<!--            :src="course.image"-->
+<!--            height="100%"-->
+<!--          />-->
           <v-img
-            :src="course.image"
-            height="100%"
+            :src="`http://localhost:8080/files?filename=${course.image}`"
+            max-height="400px"
+            contain
           />
         </v-col>
-        <v-col v-if="course.description" cols="12" md="5" lg="5">
+        <v-col v-if="course.description" cols="12" :md="course.image ? '5' : '12'" :lg="course.image ? '5' : '12'">
           <p class="course-desc">
             {{ course.description }}
           </p>
@@ -54,8 +59,8 @@
           </h2>
         </v-col>
       </v-row>
-      <v-row v-if="course.lessons.length">
-        <v-col v-for="lesson in course.lessons" :key="lesson.slug" lg="3">
+      <v-row v-if="course.lessons.length" cols="12">
+        <v-col v-for="lesson in course.lessons" :key="lesson._id" lg="4" md="4">
           <course-card :data="lesson" :is-lesson="true" @select="goToLesson" />
         </v-col>
       </v-row>
@@ -71,9 +76,9 @@
           </h2>
         </v-col>
       </v-row>
-      <v-row v-if="course.lessons.length">
-        <v-col v-for="lesson in course.lessons" :key="lesson.slug" lg="3">
-          <course-card :data="lesson" :is-test="true" @select="goToLesson" />
+      <v-row v-if="course.tests.length" cols="12" style="min-height: 100vh;">
+        <v-col v-for="test in course.tests" :key="test._id" lg="4" md="4">
+          <course-card :data="test" :is-test="true" @select="goToTest" />
         </v-col>
       </v-row>
     </v-container>
@@ -96,7 +101,7 @@
         : 'Enroll a new student to this course by providing name, email and password'"
       primary-button-label="Enroll"
       secondary-button-label="Cancel"
-      :primary-disabled="isEnrollDisabled"
+      :primary-disabled="showNewStudent ? !valid : !existingStudentEmail"
       @secondary="openStudentDialog = false"
       @primary="addStudent"
     >
@@ -109,20 +114,31 @@
           />
         </div>
         <div v-if="showNewStudent">
-          <text-input label="Name" :text-input="studentName" @input="setStudentName" />
-          <text-input label="Email" :text-input="studentEmail" @input="setStudentEmail" />
-          <text-input label="Password" :text-input="studentPassword" @input="setStudentPassword" />
+          <v-form ref="form" v-model="valid" lazy-validation>
+            <v-text-field
+              v-model="studentName"
+              label="Name"
+              :rules="nameRules"
+            />
+            <v-text-field
+              v-model="studentEmail"
+              label="Email"
+              :rules="emailRules"
+            />
+          </v-form>
         </div>
       </template>
     </app-dialog>
-    <app-dialog
-      v-if="openSuccessDialog"
-      :open-dialog="openSuccessDialog"
-      title="Success"
-      text="You have successfully enrolled a student!"
-      primary-button-label="Ok"
-      @primary="openSuccessDialog = false"
-    />
+    <v-alert
+      v-model="displayAlert"
+      dismissible
+      :type="alertType"
+      dense
+      style="position: absolute; top: 92vh; right: 2rem; width: 96%;"
+      transition="scale-transition"
+    >
+      {{ alertMessage }}
+    </v-alert>
   </div>
 </template>
 
@@ -131,9 +147,8 @@ import CourseCard from '../../../../../components/courses/CourseCard.vue'
 import AppHeader from '../../../../../components/common/AppHeader'
 import AppButton from '../../../../../components/common/AppButton'
 import AppDialog from '../../../../../components/common/AppDialog'
-import TextInput from '../../../../../components/common/input/TextInput'
 import AppButtonDropdown from '../../../../../components/common/AppButtonDropdown'
-import { ICONS } from '../../../../../common/commonHelper'
+import { ALERT_TYPES, ICONS } from '../../../../../common/commonHelper'
 
 export default {
   name: 'CoursePage',
@@ -142,7 +157,6 @@ export default {
     AppHeader,
     AppButton,
     AppDialog,
-    TextInput,
     AppButtonDropdown
   },
   data () {
@@ -152,16 +166,28 @@ export default {
       model: null,
       openDeleteDialog: false,
       openStudentDialog: false,
-      openSuccessDialog: false,
       showNewStudent: false,
       showExistingStudent: false,
       studentEmail: '',
       studentName: '',
-      studentPassword: '',
-      existingStudentEmail: ''
+      existingStudentEmail: '',
+      alertType: ALERT_TYPES.ERROR,
+      displayAlert: false,
+      alertMessage: '',
+      valid: false,
+      emailRules: [
+        v => !!v || 'E-mail is required',
+        v => /.+@.+/.test(v) || 'E-mail must be valid'
+      ],
+      nameRules: [
+        v => !!v || 'Name is required'
+      ]
     }
   },
   computed: {
+    user () {
+      return this.$store.getters.getUser
+    },
     course () {
       return this.$store.getters['courses/getActiveCourse']
     },
@@ -181,12 +207,6 @@ export default {
     },
     existingStudents () {
       return this.$store.getters.getAllStudents
-    },
-    isEnrollDisabled () {
-      if (this.showNewStudent) {
-        return !this.studentEmail || !this.studentName || !this.studentPassword
-      }
-      return !this.existingStudentEmail
     }
   },
   created () {
@@ -205,6 +225,10 @@ export default {
       this.$store.dispatch('courses/setActiveLesson', slug)
       this.$router.push(`/professor/courses/course/${this.course.slug}/lesson/${slug}`)
     },
+    goToTest (slug) {
+      this.$store.dispatch('courses/setActiveTest', slug)
+      this.$router.push(`/professor/courses/course/${this.course.slug}/test/${slug}`)
+    },
     newLesson () {
       this.$router.push(`/professor/courses/course/${this.course.slug}/new-lesson`)
     },
@@ -214,40 +238,46 @@ export default {
     editCourse () {
       this.$router.push(`/professor/courses/course/${this.course.slug}/edit-course`)
     },
-    deleteCourse () {
-      this.$store.dispatch('courses/deleteCourse', this.course.id)
-      this.$router.push('/professor/courses')
+    async deleteCourse () {
+      try {
+        await this.$store.dispatch('courses/deleteCourse', this.course._id)
+        this.alertType = ALERT_TYPES.SUCCESS
+        this.alertMessage = `You have successfully deleted ${this.course.title}.`
+        this.displayAlert = true
+        await this.$router.push('/professor/courses')
+      } catch (e) {
+        this.alertType = ALERT_TYPES.ERROR
+        this.alertMessage = e.message
+        this.displayAlert = true
+      } finally {
+        this.openDeleteDialog = false
+      }
     },
-    setStudentEmail (email) {
-      this.studentEmail = email
-    },
-    setStudentName (name) {
-      this.studentName = name
-    },
-    setStudentPassword (pass) {
-      this.studentPassword = pass
-    },
-    addStudent () {
-      if (this.showNewStudent) {
-        const newStudent = {
-          name: this.studentName,
-          email: this.studentEmail,
-          password: this.studentPassword,
-          admin: false
+    async addStudent () {
+      try {
+        if (this.showNewStudent) {
+          const data = {
+            course_id: this.course._id,
+            name: this.studentName,
+            email: this.studentEmail,
+            adminEmail: this.user.email
+          }
+          await this.$store.dispatch('courses/addStudent', data)
+        } else if (this.showExistingStudent) {
+          await this.$store.dispatch('courses/enrollExistingStudent', {
+            course_id: this.course._id,
+            email: this.existingStudentEmail
+          })
         }
-        // eslint-disable-next-line no-return-assign
-        this.$store.dispatch('courses/addStudent', newStudent).then(() => {
-          this.openSuccessDialog = true
-          this.openStudentDialog = false
-        })
-      } else if (this.showExistingStudent) {
-        this.$store.dispatch('courses/enrollExistingStudent', {
-          courseID: this.course.id,
-          email: this.existingStudentEmail
-        }).then(() => {
-          this.openSuccessDialog = true
-          this.openStudentDialog = false
-        })
+        this.alertType = ALERT_TYPES.SUCCESS
+        this.alertMessage = `You have successfully enrolled a student to ${this.course.title}.`
+        this.displayAlert = true
+      } catch (e) {
+        this.alertType = ALERT_TYPES.ERROR
+        this.alertMessage = e.message
+        this.displayAlert = true
+      } finally {
+        this.openStudentDialog = false
       }
     },
     async getExistingStudents () {

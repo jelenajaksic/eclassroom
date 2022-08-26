@@ -73,8 +73,6 @@ export default {
       this.$emit('update', this.newSection)
     },
     radioSelectCorrect (targetIndex) {
-      // // eslint-disable-next-line no-return-assign
-      // this.newSection.question.answers[ind].correct = true
       // eslint-disable-next-line no-return-assign
       this.newSection.question.answers.forEach((answer, index) => {
         answer.correct = index === targetIndex

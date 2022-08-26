@@ -64,20 +64,22 @@
       v-if="openDialog"
       :open-dialog="openDialog"
       title="Are you sure?"
-      text="If you cancel the progress will be lost."
+      text="If you leave the progress will be lost."
       primary-button-label="Leave without saving"
       secondary-button-label="Cancel"
       @secondary="openDialog = false"
-      @primary="onPrimaryAction"
+      @primary="goBack"
     />
-    <app-dialog
-      v-if="openSuccessDialog"
-      :open-dialog="openSuccessDialog"
-      title="Success"
-      text="You have successfully created a lesson!"
-      primary-button-label="Back to Course"
-      @primary="onPrimaryAction"
-    />
+    <v-alert
+      v-model="displayAlert"
+      dismissible
+      :type="alertType"
+      dense
+      style="position: absolute; top: 92vh; right: 2rem; width: 96%;"
+      transition="scale-transition"
+    >
+      {{ alertMessage }}
+    </v-alert>
   </div>
 </template>
 
@@ -87,7 +89,14 @@ import AppButton from '../../../../../../components/common/AppButton'
 import AppButtonDropdown from '../../../../../../components/common/AppButtonDropdown'
 import LessonSection from '../../../../../../components/lessons/LessonSection'
 import AppDialog from '../../../../../../components/common/AppDialog'
-import { SECTIONS, ICONS, slugFromTitle } from '../../../../../../common/commonHelper'
+import {
+  SECTIONS,
+  SECTION_TYPES,
+  ICONS,
+  ALERT_TYPES,
+  slugFromTitle,
+  uuidV4
+} from '../../../../../../common/commonHelper'
 
 export default {
   name: 'NewLesson',
@@ -108,8 +117,10 @@ export default {
       shortDescription: '',
       image: null,
       openDialog: false,
-      openSuccessDialog: false,
-      reload: false
+      reload: false,
+      alertType: ALERT_TYPES.ERROR,
+      alertMessage: '',
+      displayAlert: false
     }
   },
   computed: {
@@ -121,26 +132,72 @@ export default {
     onCancel () {
       this.openDialog = true
     },
-    async onSave () {
-      const newLesson = {
-        // id: uuidV4(),
-        slug: slugFromTitle(this.title),
-        sections: JSON.parse(JSON.stringify(this.sections)),
-        title: this.title,
-        description: this.description,
-        shortDescription: this.shortDescription,
-        image: this.image
+    isFormInvalid () {
+      if (this.sections?.length === 0) {
+        return false
+      } else {
+        let isInvalid = false
+        const questions = this.sections.filter(section => section.type === SECTION_TYPES.QUESTION)
+        questions.forEach((question) => {
+          if (question.question.answers.length === 0) {
+            isInvalid = true
+          }
+        })
+        return isInvalid
       }
-      await this.$store.dispatch('courses/addLesson', {
-        courseID: this.course.id,
-        lesson: newLesson
-      })
-      this.openSuccessDialog = true
+    },
+    async onSave () {
+      if (this.isFormInvalid()) {
+        this.alertType = ALERT_TYPES.ERROR
+        this.alertMessage = 'All questions must contain at least one answer.'
+        this.displayAlert = true
+      } else {
+        try {
+          const images = {}
+          this.sections.forEach((section) => {
+            if (typeof section.image !== 'string') {
+              const name = uuidV4()
+              images[name] = section.image
+              section.image = name
+            }
+          })
+          const newLesson = {
+            _id: uuidV4(),
+            slug: slugFromTitle(this.title),
+            sections: JSON.parse(JSON.stringify(this.sections)),
+            title: this.title,
+            description: this.description,
+            shortDescription: this.shortDescription,
+            image: uuidV4(),
+            students: {}
+          }
+          images[newLesson.image] = this.image
+
+          this.course.students.forEach((student) => {
+            newLesson.students[student] = '0'
+          })
+
+          await this.$store.dispatch('courses/addLesson', {
+            courseID: this.course._id,
+            lesson: newLesson,
+            images
+          })
+          this.alertType = ALERT_TYPES.SUCCESS
+          this.alertMessage = 'You have successfully created a new lesson.'
+          this.displayAlert = true
+          setTimeout(() => {
+            this.goBack()
+          }, 2000)
+        } catch (e) {
+          this.alertType = ALERT_TYPES.ERROR
+          this.alertMessage = e.message
+          this.displayAlert = true
+        }
+      }
     },
     addSection (item) {
       this.sections.push({
-        // TODO: add uuid
-        // id: uuidV4(),
+        id: uuidV4(),
         title: '',
         description: '',
         shortDescription: '',
@@ -173,8 +230,8 @@ export default {
       }
       this.reload = !this.reload
     },
-    onPrimaryAction () {
-      this.$router.go(-1)
+    goBack () {
+      this.$router.push('/professor/courses')
     }
   }
 }

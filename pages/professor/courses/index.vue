@@ -12,7 +12,7 @@
     </app-header>
     <v-container>
       <v-row>
-        <v-col v-for="course in courses" :key="course.id" lg="4">
+        <v-col v-for="course in courses" :key="course._id" lg="4">
           <course-card :data="course" @select="goToCourse" />
         </v-col>
       </v-row>

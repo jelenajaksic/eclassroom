@@ -3,7 +3,7 @@
     <v-row align="start" justify="start">
       <v-col v-if="section.image" md="5" lg="5">
         <v-img
-          :src="section.image"
+          :src="`http://localhost:8080/files?filename=${section.image}`"
           contain
           height="100%"
           max-height="50vh"

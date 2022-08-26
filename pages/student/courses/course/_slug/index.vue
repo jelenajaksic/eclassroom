@@ -12,16 +12,21 @@
           <app-button label="See tests" class="mr-4" />
         </a>
       </template>
+      <template slot="navigation">
+        <app-back-button label="< Back to Courses" :link="`/student/courses/`" />
+      </template>
     </app-header>
     <v-container>
       <v-row class="course-overview-wrapper" align="center">
-        <v-col cols="12" md="6" lg="6">
+        <v-col v-if="course.image" cols="12" md="6" lg="6">
           <v-img
-            :src="course.image"
+            :src="`http://localhost:8080/files?filename=${course.image}`"
+            contain
+            max-height="400px"
             height="100%"
           />
         </v-col>
-        <v-col cols="12" md="5" lg="5">
+        <v-col cols="12" :md="course.image ? '5' : '12'" :lg="course.image ? '5' : '12'">
           <p class="course-desc">
             {{ course.description }}
           </p>
@@ -39,8 +44,8 @@
           </h2>
         </v-col>
       </v-row>
-      <v-row v-if="course.lessons.length">
-        <v-col v-for="lesson in course.lessons" :key="lesson.slug" lg="3">
+      <v-row v-if="course.lessons.length" cols="12">
+        <v-col v-for="lesson in course.lessons" :key="lesson._id" lg="4" md="4">
           <course-card :data="lesson" :is-lesson="true" @select="goToLesson" />
         </v-col>
       </v-row>
@@ -56,8 +61,8 @@
           </h2>
         </v-col>
       </v-row>
-      <v-row v-if="course.tests.length" style="min-height: 100vh;">
-        <v-col v-for="test in course.tests" :key="test.slug" lg="3">
+      <v-row v-if="course.tests.length" style="min-height: 100vh;" cols="12">
+        <v-col v-for="test in course.tests" :key="test._id" lg="4" md="4">
           <course-card :data="test" :is-test="true" @select="goToTest" />
         </v-col>
       </v-row>
@@ -69,6 +74,7 @@
 import CourseCard from '../../../../../components/courses/CourseCard.vue'
 import AppHeader from '../../../../../components/common/AppHeader'
 import AppButton from '../../../../../components/common/AppButton'
+import AppBackButton from '../../../../../components/common/AppBackButton'
 import { ICONS } from '../../../../../common/commonHelper'
 
 export default {
@@ -76,7 +82,8 @@ export default {
   components: {
     CourseCard,
     AppHeader,
-    AppButton
+    AppButton,
+    AppBackButton
   },
   data () {
     return {

@@ -2,7 +2,7 @@
   <div v-if="lesson">
     <app-header>
       <template slot="title">
-        <h1>
+        <h1 style="width: max-content;">
           {{ lesson.title }}
           <span v-if="lesson.sections.length" style="font-size: 1.5rem; font-weight: normal; display: inline-block;">
             {{ `(${currentSection + 1}/${lesson.sections.length})` }}
@@ -25,10 +25,10 @@
         />
       </template>
       <template slot="navigation">
-        <v-breadcrumbs
-          :items="breadcrumbsItems"
-          divider="/"
-          style="padding: 0 0 1rem;"
+        <app-back-button
+          :label="`< Back to ${activeCourse.title}`"
+          :link="`/student/courses/course/${activeCourse.slug}`"
+          @click="saveProgress"
         />
       </template>
     </app-header>
@@ -61,6 +61,7 @@
 import AppHeader from '../../../../../../components/common/AppHeader'
 import AppButton from '../../../../../../components/common/AppButton'
 import AppDialog from '../../../../../../components/common/AppDialog'
+import AppBackButton from '../../../../../../components/common/AppBackButton'
 import LessonOverview from '../../../../../../components/lessons/student/LessonOverview'
 import { ICONS, QUESTION_TYPES, SECTION_TYPES } from '../../../../../../common/commonHelper'
 import StudentSection from '../../../../../../components/lessons/student/StudentSection'
@@ -72,7 +73,8 @@ export default {
     AppButton,
     AppDialog,
     LessonOverview,
-    StudentSection
+    StudentSection,
+    AppBackButton
   },
   data () {
     return {
@@ -87,25 +89,6 @@ export default {
   computed: {
     user () {
       return this.$store.getters.getUser
-    },
-    breadcrumbsItems () {
-      return [
-        {
-          text: 'Courses',
-          disabled: false,
-          href: '/student/courses'
-        },
-        {
-          text: `${this.activeCourse.title}`,
-          disabled: false,
-          href: `/student/courses/course/${this.activeCourse.slug}`
-        },
-        {
-          text: `${this.lesson.title}`,
-          disabled: true,
-          href: ''
-        }
-      ]
     },
     lesson () {
       return this.$store.getters['courses/getActiveLesson']
@@ -140,7 +123,6 @@ export default {
   },
   methods: {
     startLesson () {
-      // TODO: implement
       this.displayOverview = false
       if (this.lesson.sections.length === (this.currentSection + 1)) {
         this.currentSection = 0
@@ -148,14 +130,21 @@ export default {
     },
     updateCurrentSection (index) {
       this.currentSection = index
-      // this.$store.dispatch('student-lesson/updateCurrentSection', index)
     },
-    completeLesson () {
-      // this.$store.dispatch('student-lesson/completeLesson')
+    async completeLesson () {
+      await this.saveProgress()
       this.openDialog = true
     },
     backToCourse () {
       this.$router.go(-1)
+    },
+    async saveProgress () {
+      await this.$store.dispatch('courses/updateCurrentLessonSection', {
+        courseID: this.activeCourse._id,
+        lessonID: this.lesson._id,
+        sectionIndex: this.currentSection.toString(),
+        studentEmail: this.user.email
+      })
     }
   }
 }

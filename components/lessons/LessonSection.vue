@@ -79,6 +79,13 @@
             @selected="addQuestion"
           />
 
+          <div v-if="newSection.question.type === QUESTION_TYPES.TEXT">
+            <v-text-field
+              v-model="newSection.question.answers[0].label"
+              label="Answer"
+            />
+          </div>
+
           <div v-if="newSection.question.type === QUESTION_TYPES.MULTISELECT">
             <draggable v-model="newSection.question.answers">
               <transition-group>
@@ -201,7 +208,16 @@ export default {
       this.newSection.question.type = item.slug
       if (this.newSection.question.type === QUESTION_TYPES.MULTISELECT || this.newSection.question.type === QUESTION_TYPES.SINGLE_SELECT) {
         this.addAnswer()
+      } else if (this.newSection.question.type === QUESTION_TYPES.TEXT) {
+        this.addTestAnswer()
       }
+      this.updateSection()
+    },
+    addTestAnswer () {
+      this.newSection.question.answers.push({
+        label: '',
+        correct: true
+      })
       this.updateSection()
     },
     addAnswer () {

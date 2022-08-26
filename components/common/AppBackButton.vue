@@ -1,6 +1,6 @@
 <template>
-  <nuxt-link :to="link" class="back-link-wrapper">
-    <p class="back-link">
+  <nuxt-link v-if="link" :to="link" class="back-link-wrapper">
+    <p class="back-link" @click="$emit('click', $event)">
       {{ label }}
     </p>
   </nuxt-link>

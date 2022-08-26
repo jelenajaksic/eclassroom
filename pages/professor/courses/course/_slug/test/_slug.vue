@@ -2,14 +2,14 @@
   <div>
     <app-header>
       <template slot="title">
-        <h1 v-if="!edit && lesson.title">
-          {{ lesson.title }}
+        <h1 v-if="!edit && test.title">
+          {{ test.title }}
         </h1>
         <text-input
-          v-if="edit && lesson.title"
-          label="Lesson Title"
-          :text-input="lesson.title"
-          @input="e => lesson.title = e"
+          v-if="edit && test.title"
+          label="Test Title"
+          :text-input="test.title"
+          @input="e => test.title = e"
         />
       </template>
       <template slot="headerButtons">
@@ -21,9 +21,9 @@
           :icon="ICONS.TRASH"
           @click="openDeleteDialog = true"
         />
-        <app-button v-if="!edit" label="Edit Lesson" :icon="ICONS.EDIT" @click="edit = true" />
+        <app-button v-if="!edit" label="Edit Test" :icon="ICONS.EDIT" @click="edit = true" />
         <app-button v-if="edit" label="Cancel" :outlined="true" class="mr-2" @click="openDialog = true" />
-        <app-button v-if="edit" label="Save Lesson" @click="saveLesson" />
+        <app-button v-if="edit" label="Save Test" @click="saveTest" />
       </template>
       <template slot="navigation">
         <v-breadcrumbs
@@ -34,43 +34,19 @@
       </template>
     </app-header>
     <v-container>
-      <v-row>
-        <v-col>
-          <p v-if="!edit && lesson.shortDescription" style="font-size: 1.5rem;">
-            {{ lesson.shortDescription }}
-          </p>
-          <text-input
-            v-if="edit"
-            label="Lesson Short Description"
-            :text-input="lesson.shortDescription"
-            @input="e => lesson.shortDescription = e"
-          />
-        </v-col>
-      </v-row>
       <v-row align="center">
-        <v-col v-if="initLesson.image" lg="4" md="4">
+        <v-col v-if="initTest.image" lg="4" md="4">
           <v-img
-            :src="`http://localhost:8080/files?filename=${initLesson.image}`"
+            :src="`http://localhost:8080/files?filename=${initTest.image}`"
             height="200px"
             contain
           />
         </v-col>
-        <v-col :lg="initLesson.image ? '7' : '12'" :md="initLesson.image ? '7' : '12'">
-          <p v-if="!edit && lesson.description" class="mb-8">
-            {{ lesson.description }}
-          </p>
-          <text-input
-            v-if="edit"
-            label="Lesson Description"
-            :text-input="lesson.description"
-            @input="e => lesson.description = e"
-          />
-        </v-col>
       </v-row>
       <v-row align="center">
-        <v-col>
+        <v-col v-if="edit">
           <v-file-input
-            v-model="lesson.image"
+            v-model="test.image"
             show-size
             small-chips
             :prepend-icon="ICONS.CAMERA"
@@ -78,7 +54,7 @@
           />
         </v-col>
       </v-row>
-      <v-row v-for="(section, index) in lesson.sections" :key="index">
+      <v-row v-for="(section, index) in test.sections" :key="index">
         <v-card
           v-if="section"
           class="my-4 pa-10"
@@ -161,7 +137,7 @@
       primary-button-label="Delete"
       secondary-button-label="Cancel"
       @secondary="openDeleteDialog = false"
-      @primary="deleteLesson"
+      @primary="deleteTest"
     />
     <v-alert
       v-model="displayAlert"
@@ -188,7 +164,7 @@ import CheckboxEdit from '../../../../../../components/common/input/edit/Checkbo
 import RadioEdit from '../../../../../../components/common/input/edit/RadioEdit'
 
 export default {
-  name: 'LessonPage',
+  name: 'TestPage',
   components: {
     AppHeader,
     AppButton,
@@ -207,15 +183,15 @@ export default {
       edit: false,
       openDialog: false,
       openDeleteDialog: false,
-      lesson: {},
+      test: {},
       alertType: ALERT_TYPES.ERROR,
       displayAlert: false,
       alertMessage: ''
     }
   },
   computed: {
-    initLesson () {
-      return this.$store.getters['courses/getActiveLesson']
+    initTest () {
+      return this.$store.getters['courses/getActiveTest']
     },
     activeCourse () {
       return this.$store.getters['courses/getActiveCourse']
@@ -233,7 +209,7 @@ export default {
           href: `/professor/courses/course/${this.activeCourse.slug}`
         },
         {
-          text: `${this.lesson.title}`,
+          text: `${this.test.title}`,
           disabled: true,
           href: ''
         }
@@ -241,19 +217,19 @@ export default {
     }
   },
   created () {
-    this.lesson = JSON.parse(JSON.stringify(this.initLesson))
-    this.lesson.image = null
+    this.test = JSON.parse(JSON.stringify(this.initTest))
+    this.test.image = null
   },
   methods: {
-    async deleteLesson () {
+    async deleteTest () {
       try {
         this.openDeleteDialog = false
-        await this.$store.dispatch('courses/deleteLesson', {
+        await this.$store.dispatch('courses/deleteTest', {
           courseID: this.activeCourse._id,
-          lessonID: this.lesson._id
+          testID: this.test._id
         })
         this.alertType = ALERT_TYPES.SUCCESS
-        this.alertMessage = `You have successfully deleted ${this.lesson.title}.`
+        this.alertMessage = `You have successfully deleted ${this.test.title}.`
         this.displayAlert = true
         setTimeout(() => {
           this.goBack()
@@ -264,15 +240,15 @@ export default {
         this.displayAlert = true
       }
     },
-    async saveLesson () {
+    async saveTest () {
       try {
         this.edit = false
-        await this.$store.dispatch('courses/updateLesson', {
+        await this.$store.dispatch('courses/updateTest', {
           courseID: this.activeCourse._id,
-          lesson: this.lesson
+          newTest: this.test
         })
         this.alertType = ALERT_TYPES.SUCCESS
-        this.alertMessage = `You have successfully edited ${this.lesson.title}.`
+        this.alertMessage = `You have successfully edited ${this.test.title}.`
         this.displayAlert = true
         setTimeout(() => {
           this.goBack()

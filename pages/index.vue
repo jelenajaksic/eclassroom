@@ -1,13 +1,18 @@
 <template>
-  <v-form ref="form" v-model="valid" lazy-validation style="max-height: 100vh; overflow: hidden;">
+  <v-form
+    ref="form"
+    v-model="valid"
+    lazy-validation
+    class="login-wrapper"
+  >
     <v-container>
-      <v-row style="height: 90vh;" align="center">
+      <v-row class="login-content" align="center">
         <v-col cols="12" md="5" lg="5">
-          <v-row style="color: #39374b;" class="mb-16">
-            <h1 style="font-size: 3.5rem; font-weight: 500;">
+          <v-row class="mb-16">
+            <h1 class="login-title">
               Welcome back!
             </h1>
-            <h3 style="font-weight: normal; color: #39374b; margin-top: -0.25rem; margin-left: 0.5rem;">
+            <h3 class="login-subtitle">
               {{ showForgotPassword ? 'Enter your email to reset your password' : 'Please log in to your account' }}
             </h3>
           </v-row>
@@ -21,11 +26,11 @@
               required
               background-color="white"
               rounded
-              color="#100259"
             />
           </v-row>
           <v-row>
             <v-text-field
+              v-if="!showForgotPassword"
               v-model="password"
               label="Password"
               type="password"
@@ -52,7 +57,7 @@
         </v-col>
         <v-col cols="12" md="1" lg="1" />
         <v-col cols="12" md="6" lg="6">
-          <v-img src="abacus.png" />
+          <v-img src="login.png" />
         </v-col>
       </v-row>
     </v-container>
@@ -110,10 +115,10 @@ export default {
         await this.$store.dispatch('resetPassword', this.email)
         this.alertType = ALERT_TYPES.SUCCESS
         this.alertMessage = `Please check your ${this.email} inbox!`
-        this.displayAlert = true
       } catch (error) {
         this.alertType = ALERT_TYPES.ERROR
-        this.alertMessage = 'Something went wrong. Please try again.'
+        this.alertMessage = 'User with this email does not exist.'
+      } finally {
         this.displayAlert = true
       }
     }
@@ -127,5 +132,27 @@ export default {
   font-size: 12px;
   text-decoration: underline;
   cursor: pointer;
+}
+
+.login-wrapper {
+  max-height: 100vh;
+  overflow: hidden;
+}
+
+.login-content {
+  height: 90vh;
+}
+
+.login-title {
+  font-size: 3.5rem;
+  font-weight: 500;
+  color: #39374b;
+}
+
+.login-subtitle {
+  font-weight: normal;
+  margin-top: -0.25rem;
+  margin-left: 0.5rem;
+  color: #39374b;
 }
 </style>

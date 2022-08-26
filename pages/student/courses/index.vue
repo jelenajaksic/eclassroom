@@ -9,7 +9,7 @@
     </app-header>
     <v-container>
       <v-row>
-        <v-col v-for="course in courses" :key="course.id" lg="4">
+        <v-col v-for="course in courses" :key="course._id" lg="4" md="4">
           <course-card :data="course" @select="goToCourse" />
         </v-col>
       </v-row>
@@ -34,11 +34,14 @@ export default {
     }
   },
   computed: {
-    courses () {
+    allCourses () {
       return this.$store.getters['courses/getCourses']
     },
     user () {
       return this.$store.getters.getUser
+    },
+    courses () {
+      return this.allCourses?.filter(course => course.students.includes(this.user.email))
     }
   },
   created () {

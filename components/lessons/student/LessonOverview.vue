@@ -3,9 +3,9 @@
     <v-row align="center">
       <v-col cols="12" md="6" lg="6">
         <v-img
-          v-if="image"
-          :src="image"
+          :src="`http://localhost:8080/files?filename=${image}`"
           contain
+          max-height="400px"
           height="100%"
         />
       </v-col>

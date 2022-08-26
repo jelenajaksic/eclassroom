@@ -1,5 +1,3 @@
-import colors from 'vuetify/es5/util/colors'
-
 export default {
   // Disable server-side rendering: https://go.nuxtjs.dev/ssr-mode
   ssr: false,
@@ -68,10 +66,11 @@ export default {
         primary: '#627cda',
         // accent: '#54c1ed',
         secondary: '#aac0f0',
-        info: colors.teal.lighten1,
-        warning: colors.amber.base,
-        error: colors.deepOrange.accent4,
-        success: colors.green.accent3
+        info: '#288feb',
+        warning: '#F6D55C',
+        error: '#ed553b',
+        // error: colors.deepOrange.accent4,
+        success: '#3CAEA3'
       }
     }
   },

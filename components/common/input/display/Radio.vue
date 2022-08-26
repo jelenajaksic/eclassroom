@@ -21,7 +21,6 @@ export default {
       type: Array,
       default: () => []
     },
-    // TODO: remove?
     readonly: {
       type: Boolean,
       default: false

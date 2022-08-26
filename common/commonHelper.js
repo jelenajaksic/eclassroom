@@ -73,4 +73,22 @@ export const SECTIONS = [
   }
 ]
 
-export const slugFromTitle = title => title.toLowerCase().join('-')
+/**
+ * Method for converting string to slug format
+ * 'Example Example' => 'example-example'
+ * @param title
+ * @returns {string}
+ */
+export function slugFromTitle (title) {
+  return title.toLowerCase().replace(/ /g, '-')
+}
+
+/**
+ * Method for creating unique ID in uuidV4 format
+ * @returns {*}
+ */
+export const uuidV4 = () => {
+  return ([1e7] + -1e3 + -4e3 + -8e3 + -1e11).replace(/[018]/g, c =>
+    // eslint-disable-next-line no-bitwise,no-mixed-operators
+    (c ^ crypto.getRandomValues(new Uint8Array(1))[0] & 15 >> c / 4).toString(16))
+}

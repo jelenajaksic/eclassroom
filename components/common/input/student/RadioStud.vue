@@ -67,7 +67,6 @@ export default {
   },
   methods: {
     emitAnswer () {
-      console.log('answer', this.checkedAnswer === this.correctAnswer)
       if (this.isTest) {
         this.$emit('input', this.checkedAnswer === this.correctAnswer)
       }

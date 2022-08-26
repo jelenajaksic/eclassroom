@@ -19,18 +19,6 @@
             label="Title"
             required
           />
-          <v-text-field
-            v-model="shortDescription"
-            label="Short Description"
-          />
-          <v-textarea
-            v-model="description"
-            label="Description"
-            type="textarea"
-            auto-grow
-            clearable-icon
-            rows="1"
-          />
           <v-file-input
             v-model="image"
             show-size
@@ -65,12 +53,22 @@
       v-if="openDialog"
       :open-dialog="openDialog"
       title="Are you sure?"
-      text="If you cancel the progress will be lost."
+      text="If you leave the progress will be lost."
       primary-button-label="Leave without saving"
       secondary-button-label="Cancel"
       @secondary="openDialog = false"
-      @primary="onPrimaryAction"
+      @primary="goBack"
     />
+    <v-alert
+      v-model="displayAlert"
+      dismissible
+      :type="alertType"
+      dense
+      style="position: absolute; top: 92vh; right: 2rem; width: 96%;"
+      transition="scale-transition"
+    >
+      {{ alertMessage }}
+    </v-alert>
   </div>
 </template>
 
@@ -79,7 +77,14 @@ import AppHeader from '../../../../../../components/common/AppHeader'
 import AppButton from '../../../../../../components/common/AppButton'
 import LessonSection from '../../../../../../components/lessons/LessonSection'
 import AppDialog from '../../../../../../components/common/AppDialog'
-import { SECTIONS, ICONS, SECTION_TYPES, slugFromTitle } from '../../../../../../common/commonHelper'
+import {
+  SECTIONS,
+  ICONS,
+  SECTION_TYPES,
+  slugFromTitle,
+  uuidV4,
+  ALERT_TYPES
+} from '../../../../../../common/commonHelper'
 
 export default {
   name: 'NewLesson',
@@ -96,11 +101,12 @@ export default {
       sectionTypes: SECTIONS,
       sections: [],
       title: '',
-      description: '',
-      shortDescription: '',
       image: null,
       reload: false,
-      openDialog: false
+      openDialog: false,
+      alertType: ALERT_TYPES.ERROR,
+      alertMessage: '',
+      displayAlert: false
     }
   },
   computed: {
@@ -113,26 +119,49 @@ export default {
       this.openDialog = true
     },
     async onSave () {
-      this.$router.go(-1)
-      const newTest = {
-        // TODO: add uuid
-        // id: '',
-        slug: slugFromTitle(this.title),
-        sections: JSON.parse(JSON.stringify(this.sections)),
-        title: this.title,
-        description: this.description,
-        shortDescription: this.shortDescription,
-        image: this.image
+      try {
+        const images = {}
+        this.sections.forEach((section) => {
+          if (typeof section.image !== 'string') {
+            const name = uuidV4()
+            images[name] = section.image
+            section.image = name
+          }
+        })
+        const newTest = {
+          _id: uuidV4(),
+          slug: slugFromTitle(this.title),
+          sections: JSON.parse(JSON.stringify(this.sections)),
+          title: this.title,
+          image: uuidV4(),
+          students: {}
+        }
+        images[newTest.image] = this.image
+
+        this.course.students.forEach((student) => {
+          newTest.students[student] = '0'
+        })
+
+        await this.$store.dispatch('courses/addTest', {
+          courseID: this.course._id,
+          newTest,
+          images
+        })
+        this.alertType = ALERT_TYPES.SUCCESS
+        this.alertMessage = 'You have successfully created a new test.'
+        this.displayAlert = true
+        setTimeout(() => {
+          this.goBack()
+        }, 2000)
+        await this.$router.push(`/professor/courses/course/${this.course.slug}`)
+      } catch (e) {
+        this.alertType = ALERT_TYPES.ERROR
+        this.alertMessage = e.message
+        this.displayAlert = true
       }
-      await this.$store.dispatch('courses/addTest', {
-        courseID: this.course.id,
-        lesson: newTest
-      })
-      // TODO: add popup
     },
     addSection () {
       this.sections.push({
-        // TODO: add uuid
         title: '',
         description: '',
         shortDescription: '',
@@ -165,7 +194,7 @@ export default {
       }
       this.reload = !this.reload
     },
-    onPrimaryAction () {
+    goBack () {
       this.$router.go(-1)
     }
   }

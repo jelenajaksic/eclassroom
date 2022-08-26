@@ -1,10 +1,11 @@
 import { USERS } from './commonHelper'
+
 const NAVBAR_ITEMS_PROFESSOR = [
-  // {
-  //   icon: 'mdi-home',
-  //   title: 'Home',
-  //   to: '/professor'
-  // },
+  {
+    icon: 'mdi-home',
+    title: 'Home',
+    to: '/professor'
+  },
   {
     icon: 'mdi-school',
     title: 'Courses',

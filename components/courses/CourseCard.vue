@@ -4,19 +4,21 @@
       <v-card
         v-if="data"
         class="card-default mr-4 mb-4 pa-4"
+        :class="hover? 'scale' : ''"
         :elevation="hover ? 2 : 0"
         @click="$emit('select', data.slug)"
       >
         <v-img
-          :src="data.image"
+          :src="`http://localhost:8080/files?filename=${data.image}`"
           height="200px"
+          contain
         />
         <v-overlay
           v-if="data.shortDescription && !isLesson && !isTest"
           absolute
           color="white"
           :value="hover"
-          opacity="1"
+          opacity="0.95"
           class="mt-4"
           style="height: 200px"
         >
@@ -28,7 +30,7 @@
           {{ data.title }}
         </v-card-title>
 
-        <v-card-subtitle v-if="data.shortDescription && isLesson">
+        <v-card-subtitle v-if="isLesson" class="card-subtitle">
           {{ data.shortDescription }}
         </v-card-subtitle>
         <v-card-subtitle v-if="isTest && studentProgress">
@@ -48,7 +50,7 @@
 import { USERS } from '../../common/commonHelper'
 
 export default {
-  name: 'CourseCard',
+  name: 'AppCard',
   props: {
     data: {
       type: Object,
@@ -77,25 +79,41 @@ export default {
       return this.$store.getters.getUserRole
     },
     studentProgress () {
-      return this.data.students[this.user.email]
+      return this.userRole === USERS.STUDENT ? this.data.students[this.user.email] : ''
     },
     studentProgressFormatted () {
-      return this.isLesson ? Math.round(((this.studentProgress + 1) / this.data.sections.length) * 100) : this.studentProgress
+      if (this.userRole === USERS.STUDENT && this.isLesson) {
+        const currProgress = this.studentProgress === '0' ? 0 : parseInt(this.studentProgress) + 1
+        return Math.round((currProgress / this.data.sections.length) * 100)
+      } else if (this.userRole === USERS.STUDENT && this.isTest) {
+        return this.studentProgress
+      }
+      return ''
     }
   }
 }
 </script>
 
 <style lang="scss" scoped>
-  .card-default {
-    cursor: pointer;
-    min-width: 300px;
-  }
-  .overlay-text {
-    color: #000000;
-    opacity: 50%;
-    text-align: center;
-    max-width: 70%;
-    margin: 0 auto;
-  }
+.card-default {
+  cursor: pointer;
+  min-width: 300px;
+  transition: all 0.3s ease;
+}
+
+.overlay-text {
+  color: #39374b;
+  text-align: center;
+  max-width: 70%;
+  margin: 0 auto;
+}
+
+.card-subtitle {
+  min-height: 6rem;
+  padding-top: 0.5rem;
+}
+
+.scale {
+  transform: scale(1.05);
+}
 </style>

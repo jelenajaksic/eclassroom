@@ -63,7 +63,6 @@ export default {
             isAnswerCorrect = this.answers[index].correct === answer.correct
           }
         })
-        console.log(isAnswerCorrect)
         this.$emit('input', isAnswerCorrect)
       }
     }

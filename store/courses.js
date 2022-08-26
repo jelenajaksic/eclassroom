@@ -26,11 +26,16 @@ export const mutations = {
 
 export const actions = {
   async getAllCourses ({ commit }, studentEmail = '') {
-    const response = await this.$axios.$post('api/courses/get_all')
+    const response = await this.$axios.$post('api/courses/get-all')
     commit('setCourses', response)
     if (studentEmail) {
       commit('setStudent', studentEmail)
     }
+  },
+  async getCoursesFromLinked ({ commit }, user) {
+    const response = await this.$axios.$post('api/courses/get-all')
+    const coursesFromLinked = response.filter(course => user.linkedUsers.includes(course.admin))
+    commit('setCourses', coursesFromLinked)
   },
   setActiveCourse ({ commit }, slug) {
     commit('setActiveCourse', slug)
@@ -41,42 +46,45 @@ export const actions = {
   setActiveTest ({ commit }, slug) {
     commit('setActiveTest', slug)
   },
-  async addCourse ({ commit }, course) {
-    await this.$axios.$post('api/courses/add-course', course)
+  async addCourse ({ commit }, data) {
+    await this.$axios.$post('api/courses/add-course', { course: data.course })
+    const fd = new FormData()
+    fd.append('file', data.image)
+    fd.append('filename', data.course.image)
+    await this.$axios.$post('api/image', fd)
     await this.getAllCourses
   },
   async deleteCourse ({ commit }, courseID) {
-    await this.$axios.$post('api/courses/delete-course', courseID)
+    await this.$axios.$post('api/courses/delete-course', { id: courseID })
     await this.getAllCourses
   },
-  async updateCourse ({ commit }, course) {
-    await this.$axios.$post('api/courses/update-course', course)
+  async updateCourse ({ commit }, data) {
+    await this.$axios.$post('api/courses/update-course', data.course)
+    const fd = new FormData()
+    fd.append('file', data.image)
+    fd.append('filename', data.course.image)
+    await this.$axios.$post('api/image', fd)
     await this.getAllCourses
   },
-  async addStudent ({ commit }, { courseID, student }) {
-    await this.$axios.$post('api/courses/add-student', {
-      course_id: courseID,
-      student
-    })
+  async addStudent ({ commit }, data) {
+    await this.$axios.$post('api/courses/add-student', data)
   },
-  async enrollExistingStudent ({ commit }, { courseID, email }) {
-    await this.$axios.$post('api/courses/enroll-student', {
-      course_id: courseID,
-      email
-    })
+  async enrollExistingStudent ({ commit }, data) {
+    await this.$axios.$post('api/courses/enroll-student', data)
   },
-  async addLesson ({ commit }, { courseID, lesson }) {
+  async addLesson ({ commit }, { courseID, lesson, images }) {
     await this.$axios.$post('api/courses/add-lesson', {
       course_id: courseID,
       lesson
     })
-    await this.getAllCourses
-  },
-  async addTest ({ commit }, { courseID, test }) {
-    await this.$axios.$post('api/courses/add-test', {
-      course_id: courseID,
-      test
+    const promises = []
+    Object.keys(images).forEach((imageTitle) => {
+      const fd = new FormData()
+      fd.append('file', images[imageTitle])
+      fd.append('filename', imageTitle)
+      promises.push(this.$axios.$post('api/image', fd))
     })
+    await Promise.all(promises)
     await this.getAllCourses
   },
   async updateLesson ({ commit }, { courseID, lesson }) {
@@ -86,8 +94,58 @@ export const actions = {
     })
     await this.getAllCourses
   },
-  async deleteLesson ({ commit }, lessonID) {
-    await this.$axios.$post('api/courses/delete-lesson', lessonID)
+  async deleteLesson ({ commit }, { courseID, lessonID }) {
+    await this.$axios.$post('api/courses/delete-lesson', {
+      course_id: courseID,
+      lesson_id: lessonID
+    })
+    await this.getAllCourses
+  },
+  async addTest ({ commit }, { courseID, newTest, images }) {
+    await this.$axios.$post('api/courses/add-test', {
+      course_id: courseID,
+      newTest
+    })
+    const promises = []
+    Object.keys(images).forEach((imageTitle) => {
+      const fd = new FormData()
+      fd.append('file', images[imageTitle])
+      fd.append('filename', imageTitle)
+      promises.push(this.$axios.$post('api/image', fd))
+    })
+    await Promise.all(promises)
+    await this.getAllCourses
+  },
+  async updateTest ({ commit }, { courseID, newTest }) {
+    await this.$axios.$post('api/courses/update-test', {
+      course_id: courseID,
+      newTest
+    })
+    await this.getAllCourses
+  },
+  async deleteTest ({ commit }, { courseID, testID }) {
+    await this.$axios.$post('api/courses/delete-test', {
+      course_id: courseID,
+      test_id: testID
+    })
+    await this.getAllCourses
+  },
+  async updateCurrentLessonSection ({ commit }, { courseID, lessonID, sectionIndex, studentEmail }) {
+    await this.$axios.$post('api/courses/update-current-lesson-section', {
+      course_id: courseID,
+      lesson_id: lessonID,
+      sectionIndex,
+      studentEmail
+    })
+    await this.getAllCourses
+  },
+  async updateTestProgress ({ commit }, { courseID, testID, score, studentEmail }) {
+    await this.$axios.$post('api/courses/update-test-progress', {
+      course_id: courseID,
+      test_id: testID,
+      score,
+      studentEmail
+    })
     await this.getAllCourses
   }
 }
@@ -107,16 +165,4 @@ export const getters = {
     return state.courses.find(course => course.slug === state.activeCourseSlug).tests
       .find(test => test.slug === state.activeTestSlug)
   }
-  // getLessonProgress (state) {
-  //   return state.courses.find(course => course.slug === state.activeCourseSlug)?.lessons.length
-  //     ? state.courses.find(course => course.slug === state.activeCourseSlug)
-  //       .students[state.studentEmail].lessons[state.activeLessonSlug]
-  //     : '0'
-  // },
-  // getTestProgress (state) {
-  //   return state.courses.find(course => course.slug === state.activeCourseSlug)?.tests.length
-  //     ? state.courses.find(course => course.slug === state.activeCourseSlug)
-  //       .students[state.studentEmail].tests[state.activeTestSlug]
-  //     : '0'
-  // }
 }
